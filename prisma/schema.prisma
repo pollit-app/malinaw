@@ -19,6 +19,10 @@ model Bill {
   significance BillSignificance
   status       String
 
+  // OCR
+  fullText  String
+  sourceUrl String
+
   // Generated
   summary         String
   stances         Stance[]
@@ -34,12 +38,13 @@ model Stance {
 }
 
 model Politician {
-  id                  String           @id @default(uuid()) @db.Uuid
-  name                String
-  role                String
-  location            String
-  congressMemberships String[]
-  billAuthorships     BillAuthorship[]
+  id       String @id @default(uuid()) @db.Uuid
+  name     String
+  role     String
+  location String
+  photoUrl String
+
+  billAuthorships BillAuthorship[]
 }
 
 model BillAuthorship {
