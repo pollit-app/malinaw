@@ -1,7 +1,6 @@
 import { Bill, BillSignificance } from ".prisma/client";
-import axios from "axios";
 import fs from "fs";
-import puppeteer, { Page, ElementHandle } from "puppeteer";
+import puppeteer, { ElementHandle, Page } from "puppeteer";
 
 const BASE_URL = "https://www.congress.gov.ph/legisdocs/?v=bills";
 const OUTPUT_DIR = "./src/data/scraper/output";
@@ -26,7 +25,7 @@ type BillHistoryModalRows = [
  * Extract text from a table row
  */
 async function extractText(
-  row: ElementHandle<HTMLTableRowElement>,
+  row: ElementHandle<HTMLTableRowElement> | undefined,
   prefix: string,
   isBold = false
 ): Promise<string> {
@@ -55,11 +54,21 @@ async function extractText(
  * Parse rows in a Bill history modal
  */
 async function parseRows(rows: BillHistoryModalRows): Promise<BillHistory> {
-  const billNum = await extractText(rows[0], "", true);
-  const title = await extractText(rows[1], "FULL TITLE : ");
-  const abstract = await extractText(rows[2], "ABSTRACT : ");
-  const dateFiled = await extractText(rows[4], "DATE FILED : ");
-  const significanceStr = await extractText(rows[5], "SIGNIFICANCE: ");
+  let i = 0;
+  const billNum = await extractText(rows[i++], "", true);
+  const title = await extractText(rows[i++], "FULL TITLE : ");
+
+  // Check if short title is present
+  const line = await extractText(rows[i], "");
+  let shortTitle = null;
+  if (line.startsWith("SHORT TITLE")) {
+    shortTitle = await extractText(rows[i++], "SHORT TITLE : ");
+  }
+  const abstract = await extractText(rows[i++], "ABSTRACT : ");
+
+  i++; // Skip principal authors line
+  const dateFiled = await extractText(rows[i++], "DATE FILED : ");
+  const significanceStr = await extractText(rows[i++], "SIGNIFICANCE: ");
   let significance: BillSignificance = BillSignificance.NATIONAL;
   switch (significanceStr) {
     case "NATIONAL":
@@ -74,12 +83,12 @@ async function parseRows(rows: BillHistoryModalRows): Promise<BillHistory> {
         `Unknown BillSignificance encountered: "${significanceStr}"`
       );
   }
-
   const status = await extractText(rows[rows.length - 1]!, "");
 
   return {
     billNum,
     title,
+    shortTitle,
     abstract,
     dateFiled,
     significance,
@@ -87,6 +96,9 @@ async function parseRows(rows: BillHistoryModalRows): Promise<BillHistory> {
   };
 }
 
+/**
+ * Open the Bill history modal
+ */
 async function openModal(
   page: Page,
   dataId: string
@@ -116,6 +128,9 @@ async function openModal(
   return rows as any;
 }
 
+/**
+ * Close the currently active modal
+ */
 async function closeModal(page: Page) {
   const selector = `button[data-dismiss='modal']`;
   const button = await page.waitForSelector(selector);
@@ -144,12 +159,13 @@ async function main() {
 
   const bills = [];
   let counter = 0;
-  for (const anchor of anchors.slice(0, 10)) {
+  for (const anchor of anchors) {
     try {
       const dataId = await anchor.evaluate((e) => e.getAttribute("data-id"));
       if (dataId == null) {
         throw new Error("Missing data-id on anchor!");
       }
+
       console.log("Loading bill", dataId);
       const rows = await openModal(page, dataId);
       const billHistory = await parseRows(rows as BillHistoryModalRows);
@@ -157,6 +173,7 @@ async function main() {
       await closeModal(page);
 
       if (counter++ >= 5) {
+        // Periodically save to disk
         fs.writeFileSync(
           `${OUTPUT_DIR}/bills.json`,
           JSON.stringify(bills, null, 2)

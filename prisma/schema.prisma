@@ -14,6 +14,7 @@ model Bill {
   id           String           @id @default(uuid()) @db.Uuid
   billNum      String
   title        String
+  shortTitle   String?
   abstract     String
   dateFiled    String
   significance BillSignificance
