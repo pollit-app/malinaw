@@ -1,10 +1,10 @@
 import { Bill, BillSignificance } from ".prisma/client";
 import fs from "fs";
-import puppeteer, { ElementHandle, Page } from "puppeteer";
+import { ElementHandle, Page } from "puppeteer";
+import getBrowser from "./util/getBrowser";
 
 const BASE_URL = "https://www.congress.gov.ph/legisdocs/?v=bills";
 const OUTPUT_DIR = "./src/data/scraper/output";
-const BROWSER_URL = "http://localhost:21222";
 
 type BillHistory = Omit<Bill, "id" | "fullText" | "sourceUrl" | "summary">;
 type TableRow = ElementHandle<HTMLTableRowElement>;
@@ -47,7 +47,9 @@ async function extractText(
     throw new Error(`Error parsing undefined cell with prefix ${prefix}`);
   }
 
-  return text;
+  // Remove invisible characters
+  const cleaned = text.replace(/[\u0000-\u001F\u007F-\u009F]/g, "");
+  return cleaned;
 }
 
 /**
@@ -115,6 +117,7 @@ async function openModal(
   await page.waitForSelector(modalSelector);
 
   const modal = await page.$(modalSelector);
+  await modal?.waitForSelector("tr");
   const rows = await modal?.$$("tr");
 
   if (rows == undefined) {
@@ -144,19 +147,15 @@ async function closeModal(page: Page) {
 }
 
 async function main() {
-  console.log("Launching puppeteer");
-  // const browser = await puppeteer.launch({
-  //   headless: false,
-  //   executablePath: "/usr/bin/google-chrome",
-  // });
-  const browser = await puppeteer.connect({ browserURL: BROWSER_URL });
+  // Visit page
+  const browser = await getBrowser();
   const page = await browser.newPage();
-
-  console.log("Visiting website");
   await page.goto(BASE_URL);
 
+  // Generate links to retrieve
   const anchors = await page.$$("a[href='#HistoryModal']");
 
+  // Parse each page
   const bills = [];
   let counter = 0;
   for (const anchor of anchors) {
@@ -166,10 +165,10 @@ async function main() {
         throw new Error("Missing data-id on anchor!");
       }
 
-      console.log("Loading bill", dataId);
       const rows = await openModal(page, dataId);
       const billHistory = await parseRows(rows as BillHistoryModalRows);
       bills.push(billHistory);
+      console.log("Loaded", dataId, billHistory.billNum);
       await closeModal(page);
 
       if (counter++ >= 5) {
