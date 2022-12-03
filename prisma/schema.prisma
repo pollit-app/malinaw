@@ -60,7 +60,7 @@ model BillAuthorship {
 
 enum BillSignificance {
   NATIONAL
-  REGIONAL
+  LOCAL
 }
 
 enum BillAuthorshipType {
