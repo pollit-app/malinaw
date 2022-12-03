@@ -26,29 +26,33 @@ type BillHistoryModalRows = [
  */
 async function extractText(
   row: ElementHandle<HTMLTableRowElement> | undefined,
-  prefix: string,
-  isBold = false
+  isBold = false,
+  trimPrefix = true
 ): Promise<string> {
   const textSelector = isBold ? "b" : "td";
   const cell = await row?.$(textSelector);
 
   // Extract text from cell
-  const text = await cell?.evaluate((element, offset) => {
+  const cellText = await cell?.evaluate((element, truncate) => {
     let text = element.textContent?.trim();
     if (text?.startsWith('"')) {
       // Remove leading and trailing quotes
       text = text.substring(1, text.length - 1);
     }
+    let offset = 0;
+    if (truncate) {
+      offset = (text?.indexOf(":") ?? -1) + 1;
+    }
 
     return text?.substring(offset).trim();
-  }, prefix.length);
+  }, trimPrefix);
 
-  if (text === undefined) {
-    throw new Error(`Error parsing undefined cell with prefix ${prefix}`);
+  if (cellText === undefined) {
+    throw new Error("Error parsing undefined cell");
   }
 
   // Remove invisible characters
-  const cleaned = text.replace(/[\u0000-\u001F\u007F-\u009F]/g, "");
+  const cleaned = cellText.replace(/[\u0000-\u001F\u007F-\u009F]/g, "");
   return cleaned;
 }
 
@@ -57,20 +61,20 @@ async function extractText(
  */
 async function parseRows(rows: BillHistoryModalRows): Promise<BillHistory> {
   let i = 0;
-  const billNum = await extractText(rows[i++], "", true);
-  const title = await extractText(rows[i++], "FULL TITLE : ");
+  const billNum = await extractText(rows[i++], true);
+  const title = await extractText(rows[i++]);
 
   // Check if short title is present
-  const line = await extractText(rows[i], "");
+  const line = await extractText(rows[i], false, false);
   let shortTitle = null;
   if (line.startsWith("SHORT TITLE")) {
-    shortTitle = await extractText(rows[i++], "SHORT TITLE : ");
+    shortTitle = await extractText(rows[i++]);
   }
-  const abstract = await extractText(rows[i++], "ABSTRACT : ");
+  const abstract = await extractText(rows[i++]);
 
   i++; // Skip principal authors line
-  const dateFiled = await extractText(rows[i++], "DATE FILED : ");
-  const significanceStr = await extractText(rows[i++], "SIGNIFICANCE: ");
+  const dateFiled = await extractText(rows[i++]);
+  const significanceStr = await extractText(rows[i++]);
   let significance: BillSignificance = BillSignificance.NATIONAL;
   switch (significanceStr) {
     case "NATIONAL":
@@ -85,7 +89,7 @@ async function parseRows(rows: BillHistoryModalRows): Promise<BillHistory> {
         `Unknown BillSignificance encountered: "${significanceStr}"`
       );
   }
-  const status = await extractText(rows[rows.length - 1]!, "");
+  const status = await extractText(rows[rows.length - 1]!);
 
   return {
     billNum,
@@ -99,22 +103,54 @@ async function parseRows(rows: BillHistoryModalRows): Promise<BillHistory> {
 }
 
 /**
+ * Wait for an element to be visible
+ */
+async function waitForElementVisible(
+  page: Page,
+  selector: string,
+  visible: boolean
+) {
+  await page.waitForFunction(
+    (selector: string, target: string) => {
+      const element = document.querySelector(selector) as HTMLElement;
+      return element.style["display"] === target;
+    },
+    {
+      timeout: 5_000,
+    },
+    selector,
+    visible ? "block" : "none"
+  );
+}
+
+/**
  * Open the Bill history modal
  */
 async function openModal(
   page: Page,
   dataId: string
 ): Promise<BillHistoryModalRows> {
-  const anchor = await page.waitForSelector(`a[data-id='${dataId}']`);
-  if (anchor == null) {
-    throw new Error(`Could not find anchor tag with data-id='${dataId}'`);
-  }
-  await page.evaluate((anchorElement) => {
-    anchorElement.click();
-  }, anchor);
-
+  const anchorSelector = `a[data-id='${dataId}']`;
+  // const anchor = await page.waitForSelector(`a[data-id='${dataId}']`);
+  // if (anchor == null) {
+  //   throw new Error(`Could not find anchor tag with data-id='${dataId}'`);
+  // }
   const modalSelector = "#HistoryModal";
-  await page.waitForSelector(modalSelector);
+
+  for (let i = 0; i < 6; i++) {
+    try {
+      await page.evaluate(
+        `document.querySelector("${anchorSelector}").click()`
+      );
+      // await page.evaluate((anchorElement) => {
+      //   anchorElement.click();
+      // }, anchor);
+      await waitForElementVisible(page, modalSelector, true);
+      break;
+    } catch (err) {
+      continue;
+    }
+  }
 
   const modal = await page.$(modalSelector);
   await modal?.waitForSelector("tr");
@@ -141,9 +177,16 @@ async function closeModal(page: Page) {
     throw new Error("Could not find modal close button!");
   }
 
-  await page.evaluate((buttonElement) => {
-    buttonElement.click();
-  }, button);
+  for (let i = 0; i < 6; i++) {
+    try {
+      await page.evaluate((buttonElement) => {
+        buttonElement.click();
+      }, button);
+      await waitForElementVisible(page, "#HistoryModal", false);
+    } catch (err) {
+      continue;
+    }
+  }
 }
 
 async function main() {
@@ -158,17 +201,25 @@ async function main() {
   // Parse each page
   const bills = [];
   let counter = 0;
+  const visited = new Set();
+  const errors = [];
   for (const anchor of anchors) {
+    const dataId = await anchor.evaluate((e) => e.getAttribute("data-id"));
     try {
-      const dataId = await anchor.evaluate((e) => e.getAttribute("data-id"));
       if (dataId == null) {
         throw new Error("Missing data-id on anchor!");
       }
 
       const rows = await openModal(page, dataId);
       const billHistory = await parseRows(rows as BillHistoryModalRows);
+      if (visited.has(billHistory.billNum)) {
+        console.log("Duplicate bill parsed:", billHistory.billNum);
+        continue;
+      }
+      visited.add(billHistory.billNum);
       bills.push(billHistory);
       console.log("Loaded", dataId, billHistory.billNum);
+
       await closeModal(page);
 
       if (counter++ >= 5) {
@@ -180,12 +231,14 @@ async function main() {
         counter = 0;
       }
     } catch (err) {
+      errors.push(dataId);
       console.error(err);
       continue;
     }
   }
 
   fs.writeFileSync(`${OUTPUT_DIR}/bills.json`, JSON.stringify(bills, null, 2));
+  console.log("Errors", errors);
 
   await page.close();
 }
