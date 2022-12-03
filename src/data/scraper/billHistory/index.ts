@@ -1,10 +1,12 @@
 import { Bill, BillSignificance } from ".prisma/client";
 import fs from "fs";
 import { ElementHandle, Page } from "puppeteer";
-import getBrowser from "./util/getBrowser";
+import getBrowser from "../util/getBrowser";
+import parseBillHistoryRows from "./billHistoryParser";
 
 const BASE_URL = "https://www.congress.gov.ph/legisdocs/?v=bills";
 const OUTPUT_DIR = "./src/data/scraper/output";
+const MODAL_RETRY_COUNT = 5;
 
 type BillHistory = Omit<Bill, "id" | "fullText" | "sourceUrl" | "summary">;
 type TableRow = ElementHandle<HTMLTableRowElement>;
@@ -20,87 +22,6 @@ type BillHistoryModalRows = [
   TableRow, // Status label
   TableRow // Status text
 ];
-
-/**
- * Extract text from a table row
- */
-async function extractText(
-  row: ElementHandle<HTMLTableRowElement> | undefined,
-  isBold = false,
-  trimPrefix = true
-): Promise<string> {
-  const textSelector = isBold ? "b" : "td";
-  const cell = await row?.$(textSelector);
-
-  // Extract text from cell
-  const cellText = await cell?.evaluate((element, truncate) => {
-    let text = element.textContent?.trim();
-    if (text?.startsWith('"')) {
-      // Remove leading and trailing quotes
-      text = text.substring(1, text.length - 1);
-    }
-    let offset = 0;
-    if (truncate) {
-      offset = (text?.indexOf(":") ?? -1) + 1;
-    }
-
-    return text?.substring(offset).trim();
-  }, trimPrefix);
-
-  if (cellText === undefined) {
-    throw new Error("Error parsing undefined cell");
-  }
-
-  // Remove invisible characters
-  const cleaned = cellText.replace(/[\u0000-\u001F\u007F-\u009F]/g, "");
-  return cleaned;
-}
-
-/**
- * Parse rows in a Bill history modal
- */
-async function parseRows(rows: BillHistoryModalRows): Promise<BillHistory> {
-  let i = 0;
-  const billNum = await extractText(rows[i++], true);
-  const title = await extractText(rows[i++]);
-
-  // Check if short title is present
-  const line = await extractText(rows[i], false, false);
-  let shortTitle = null;
-  if (line.startsWith("SHORT TITLE")) {
-    shortTitle = await extractText(rows[i++]);
-  }
-  const abstract = await extractText(rows[i++]);
-
-  i++; // Skip principal authors line
-  const dateFiled = await extractText(rows[i++]);
-  const significanceStr = await extractText(rows[i++]);
-  let significance: BillSignificance = BillSignificance.NATIONAL;
-  switch (significanceStr) {
-    case "NATIONAL":
-      break;
-
-    case "REGIONAL":
-      significance = BillSignificance.REGIONAL;
-      break;
-
-    default:
-      throw new Error(
-        `Unknown BillSignificance encountered: "${significanceStr}"`
-      );
-  }
-  const status = await extractText(rows[rows.length - 1]!);
-
-  return {
-    billNum,
-    title,
-    shortTitle,
-    abstract,
-    dateFiled,
-    significance,
-    status,
-  };
-}
 
 /**
  * Wait for an element to be visible
@@ -137,7 +58,7 @@ async function openModal(
   // }
   const modalSelector = "#HistoryModal";
 
-  for (let i = 0; i < 6; i++) {
+  for (let i = 0; i < MODAL_RETRY_COUNT + 1; i++) {
     try {
       await page.evaluate(
         `document.querySelector("${anchorSelector}").click()`
@@ -177,7 +98,7 @@ async function closeModal(page: Page) {
     throw new Error("Could not find modal close button!");
   }
 
-  for (let i = 0; i < 6; i++) {
+  for (let i = 0; i < MODAL_RETRY_COUNT + 1; i++) {
     try {
       await page.evaluate((buttonElement) => {
         buttonElement.click();
@@ -203,7 +124,7 @@ async function main() {
   let counter = 0;
   const visited = new Set();
   const errors = [];
-  for (const anchor of anchors) {
+  for (const anchor of anchors.slice(0, 1)) {
     const dataId = await anchor.evaluate((e) => e.getAttribute("data-id"));
     try {
       if (dataId == null) {
@@ -211,7 +132,9 @@ async function main() {
       }
 
       const rows = await openModal(page, dataId);
-      const billHistory = await parseRows(rows as BillHistoryModalRows);
+      const billHistory = await parseBillHistoryRows(
+        rows as BillHistoryModalRows
+      );
       if (visited.has(billHistory.billNum)) {
         console.log("Duplicate bill parsed:", billHistory.billNum);
         continue;

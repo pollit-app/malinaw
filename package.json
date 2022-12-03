@@ -8,7 +8,7 @@
     "postinstall": "prisma generate",
     "lint": "next lint",
     "start": "next start",
-    "scraper:bill": "ts-node src/data/scraper/billHistory.ts",
+    "scraper:bill": "ts-node src/data/scraper/billHistory/index.ts",
     "prisma:generate": "prisma generate"
   },
   "dependencies": {
