@@ -9,15 +9,14 @@ type TableRow = ElementHandle<HTMLTableRowElement>;
 
 interface Section {
   field: keyof Omit<BillHistory, "committeeReferrals">;
-  endPrefix?: string;
-  prefix?: string;
-  bold?: boolean;
+  prefix: string;
+  delimeter?: string;
   optional?: boolean;
 }
 
 // Expected sections in the modal
 const sections: Section[] = [
-  { field: "billNum", bold: true },
+  { field: "billNum", prefix: "House Bill/Resolution NO.", delimeter: "." },
   { field: "title", prefix: "FULL TITLE" },
   { field: "shortTitle", prefix: "SHORT TITLE", optional: true },
   { field: "abstract", prefix: "ABSTRACT", optional: true },
@@ -28,6 +27,13 @@ const sections: Section[] = [
 const END_MARKER = "ACTIONS TAKEN";
 const END_FIELD = "committeeReferrals";
 
+// Special characters to replace
+const specialChars = [
+  [/[\u0000-\u001F\u007F-\u009F]/g, ""], // invisible characters
+  [/\u00a0/g, " "], // nbsp
+  [/\ufffd/g, "\u00f1"], // n with tilde
+] as [RegExp, string][];
+
 /**
  * Extract text from a table row
  */
@@ -35,8 +41,7 @@ async function extractTableRowText(
   row: ElementHandle<HTMLTableRowElement> | undefined,
   isBold = false
 ): Promise<string> {
-  const textSelector = isBold ? "b" : "td";
-  const cell = await row?.$(textSelector);
+  const cell = await row?.$("td");
 
   // Extract text from cell
   const cellText = await cell?.evaluate((element) => {
@@ -47,11 +52,12 @@ async function extractTableRowText(
     throw new Error("Error parsing undefined cell");
   }
 
-  // Remove invisible characters
-  let cleaned = cellText.replace(/[\u0000-\u001F\u007F-\u009F]/g, "");
-
-  // Convert nbsp to space
-  cleaned = cellText.replace(/\u00a0/g, " ");
+  // Replace special characters
+  let cleaned = specialChars.reduce(
+    (curr: string, [pattern, replacement]) =>
+      curr.replace(pattern, replacement),
+    cellText
+  );
 
   // Remove leading/trailing quotes, if present
   if (cleaned.startsWith('"')) {
@@ -62,11 +68,11 @@ async function extractTableRowText(
 }
 
 /**
- * Remove any label prefixes from the string, identified by the ':' character
+ * Remove any label prefixes from the string, identified by the delimeter
  */
-function trimPrefix(text: string): string {
-  // Remove all characters up to the first ":", if it exists
-  const offset = (text.indexOf(":") ?? -1) + 1;
+function trimPrefix(text: string, delim = ":"): string {
+  // Remove all characters up to the first delimeter, if it exists
+  const offset = (text.indexOf(delim) ?? -1) + 1;
   return text.substring(offset).trim();
 }
 
@@ -95,34 +101,33 @@ async function rowTextMatchesSection(
   text: string,
   section: Section
 ): Promise<boolean> {
-  return (
-    section.bold || // If bold, successful text extraction implies match
-    section.prefix == undefined || // If no prefix, automatic match
-    text.startsWith(section.prefix)
-  );
+  return text.startsWith(section.prefix);
 }
 
 async function parseSections(
   rows: TableRow[]
 ): Promise<[TableRow[], Partial<BillHistory>]> {
-  let acc = rows;
+  // Reverse rows to pop from end
+  let acc = [...rows];
+  acc.reverse();
   const billHistory = {} as Partial<BillHistory>;
 
   for (const section of sections) {
+    let match = false;
     while (acc.length > 0) {
       // Get the next row from start
-      const row = acc.shift();
+      const row = acc.pop();
       if (row == undefined) {
         throw new Error("Unexpected undefined row!");
       }
 
       try {
-        const rowText = await extractTableRowText(row, section.bold ?? false);
-        const match = await rowTextMatchesSection(rowText, section);
+        const rowText = await extractTableRowText(row);
+        match = await rowTextMatchesSection(rowText, section);
 
         if (match) {
           // If match, set field in billHistory
-          const trimmed = trimPrefix(rowText as string);
+          const trimmed = trimPrefix(rowText as string, section.delimeter);
 
           // Parse significance into enum, as required
           if (section.field === "significance") {
@@ -131,7 +136,11 @@ async function parseSections(
             billHistory[section.field] = trimmed;
           }
           break;
-        } else if (!section.optional) {
+        } else if (section.optional) {
+          // If section optional and match not found, push back row and try checking using next section
+          acc.push(row);
+          break;
+        } else {
           // If match not found and section is required, continue to next line
           continue;
         }
@@ -141,11 +150,13 @@ async function parseSections(
       }
     }
 
-    if (!section.optional && acc.length == 0) {
+    if (!section.optional && !match) {
       throw new Error(`Missing required section: ${section.field}`);
     }
   }
 
+  // Unreverse acc
+  acc.reverse();
   return [acc, billHistory];
 }
 
@@ -153,6 +164,7 @@ async function parseEnd(rows: TableRow[]): Promise<Partial<BillHistory>> {
   let acc = rows;
   const billHistory = {} as Partial<BillHistory>;
   const matching = [];
+
   while (acc.length > 0) {
     const row = acc.pop();
     try {
