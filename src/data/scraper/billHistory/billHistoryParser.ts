@@ -5,7 +5,6 @@ export type BillHistory = Omit<
   Bill,
   "id" | "fullText" | "sourceUrl" | "summary"
 >;
-type TableRow = ElementHandle<HTMLTableRowElement>;
 
 interface Section {
   field: keyof Omit<BillHistory, "committeeReferrals">;
@@ -37,16 +36,9 @@ const specialChars = [
 /**
  * Extract text from a table row
  */
-async function extractTableRowText(
-  row: ElementHandle<HTMLTableRowElement> | undefined,
-  isBold = false
-): Promise<string> {
-  const cell = await row?.$("td");
-
+function extractTableRowText(row: HTMLTableRowElement | undefined): string {
   // Extract text from cell
-  const cellText = await cell?.evaluate((element) => {
-    return element.textContent?.trim();
-  });
+  const cellText = row?.textContent?.trim();
 
   if (cellText === undefined) {
     throw new Error("Error parsing undefined cell");
@@ -97,16 +89,13 @@ function parseBillSignificance(significanceStr: string): BillSignificance {
 /**
  * Returns true if the specified row text matches the current section
  */
-async function rowTextMatchesSection(
-  text: string,
-  section: Section
-): Promise<boolean> {
+function rowTextMatchesSection(text: string, section: Section): boolean {
   return text.startsWith(section.prefix);
 }
 
-async function parseSections(
-  rows: TableRow[]
-): Promise<[TableRow[], Partial<BillHistory>]> {
+function parseSections(
+  rows: HTMLTableRowElement[]
+): [HTMLTableRowElement[], Partial<BillHistory>] {
   // Reverse rows to pop from end
   let acc = [...rows];
   acc.reverse();
@@ -122,8 +111,8 @@ async function parseSections(
       }
 
       try {
-        const rowText = await extractTableRowText(row);
-        match = await rowTextMatchesSection(rowText, section);
+        const rowText = extractTableRowText(row);
+        match = rowTextMatchesSection(rowText, section);
 
         if (match) {
           // If match, set field in billHistory
@@ -160,7 +149,7 @@ async function parseSections(
   return [acc, billHistory];
 }
 
-async function parseEnd(rows: TableRow[]): Promise<Partial<BillHistory>> {
+function parseEnd(rows: HTMLTableRowElement[]): Partial<BillHistory> {
   let acc = rows;
   const billHistory = {} as Partial<BillHistory>;
   const matching = [];
@@ -168,7 +157,7 @@ async function parseEnd(rows: TableRow[]): Promise<Partial<BillHistory>> {
   while (acc.length > 0) {
     const row = acc.pop();
     try {
-      const rowText = await extractTableRowText(row);
+      const rowText = extractTableRowText(row);
 
       if (rowText.startsWith(END_MARKER)) {
         // Marker reached. Break
@@ -186,11 +175,11 @@ async function parseEnd(rows: TableRow[]): Promise<Partial<BillHistory>> {
   return billHistory;
 }
 
-export default async function parseBillHistoryRows(
-  rows: TableRow[]
-): Promise<BillHistory> {
-  const [remainingRows, partialHistory] = await parseSections(rows);
-  const endHistory = await parseEnd(remainingRows);
+export default function parseBillHistoryRows(
+  rows: HTMLTableRowElement[]
+): BillHistory {
+  const [remainingRows, partialHistory] = parseSections(rows);
+  const endHistory = parseEnd(remainingRows);
 
   const billHistory = {
     ...partialHistory,
