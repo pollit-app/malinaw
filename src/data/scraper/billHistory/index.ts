@@ -2,8 +2,6 @@ import axios from "axios";
 import FormData from "form-data";
 import fs from "fs";
 import { parse } from "node-html-parser";
-import { ElementHandle, Page } from "puppeteer";
-import getBrowser from "../util/getBrowser";
 import parseBillHistoryRows, { BillHistory } from "./billHistoryParser";
 import { loadRowIds } from "./rowIds";
 

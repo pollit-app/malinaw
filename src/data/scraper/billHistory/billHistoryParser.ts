@@ -1,5 +1,4 @@
 import { Bill, BillSignificance } from "@prisma/client";
-import { ElementHandle } from "puppeteer";
 
 export type BillHistory = Omit<
   Bill,
