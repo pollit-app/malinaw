@@ -1,7 +1,10 @@
 import { PrismaClient } from "@prisma/client";
+import { writeFileSync } from "fs";
 import parseBillHistoryRows from "../scraper/billHistory/billHistoryParser";
 import requestModal from "../scraper/billHistory/requestModal";
 import { loadRowIds } from "../scraper/billHistory/rowIds";
+
+const OUTPUT_DIR = "./src/data/upload/output";
 
 export const prisma = new PrismaClient({
   log: ["query", "error", "warn"],
@@ -31,6 +34,8 @@ async function main() {
     }
   }
 
+  writeFileSync(`${OUTPUT_DIR}/errors.json`, JSON.stringify(errors, null, 2));
+  console.log(errors);
   console.log("Done");
 }
 
