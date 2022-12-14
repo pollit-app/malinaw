@@ -8,8 +8,9 @@
     "postinstall": "prisma generate",
     "lint": "next lint",
     "start": "next start",
+    "prisma:generate": "prisma generate",
     "scraper:bill": "ts-node src/data/upload/index.ts",
-    "prisma:generate": "prisma generate"
+    "ocr": "ts-node src/data/ocr/index.ts"
   },
   "dependencies": {
     "@prisma/client": "^4.5.0",
@@ -20,6 +21,7 @@
     "@trpc/server": "^10.0.0",
     "axios": "^1.2.0",
     "form-data": "^4.0.0",
+    "glob": "^8.0.3",
     "next": "13.0.2",
     "node-fetch": "^2.6.7",
     "node-html-parser": "^6.1.4",
@@ -30,6 +32,7 @@
     "zod": "^3.18.0"
   },
   "devDependencies": {
+    "@types/glob": "^8.0.0",
     "@types/node": "^18.0.0",
     "@types/node-fetch": "^2.6.2",
     "@types/react": "^18.0.14",

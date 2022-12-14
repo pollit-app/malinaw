@@ -28,7 +28,7 @@ const BASE_PDF_URL =
   "https://hrep-website.s3.ap-southeast-1.amazonaws.com/legisdocs/basic_19";
 
 // Special characters to replace
-const specialChars = [
+const replacementRules = [
   [/[\u0000-\u001F\u007F-\u009F]/g, ""], // invisible characters
   [/\u00a0/g, " "], // nbsp
   [/\ufffd/g, "\u00f1"], // n with tilde
@@ -46,7 +46,7 @@ function extractTableRowText(row: HTMLTableRowElement | undefined): string {
   }
 
   // Replace special characters
-  let cleaned = specialChars.reduce(
+  let cleaned = replacementRules.reduce(
     (curr: string, [pattern, replacement]) =>
       curr.replace(pattern, replacement),
     cellText

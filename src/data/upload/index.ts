@@ -1,9 +1,5 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../db/client";
 import uploadBillHistory from "./uploadBillHistory";
-
-export const prisma = new PrismaClient({
-  log: ["query", "error", "warn"],
-});
 
 async function main() {
   await uploadBillHistory(prisma);
