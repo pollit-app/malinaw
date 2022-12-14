@@ -1,12 +1,12 @@
-import { Bill, BillSignificance } from "@prisma/client";
+import { Bill, BillSignificance, PrismaClient } from "@prisma/client";
 
-export type BillHistory = Omit<
-  Bill,
-  "id" | "fullText" | "sourceUrl" | "summary"
->;
+export type BillHistory = Omit<Bill, "id" | "fullText" | "summary">;
 
 interface Section {
-  field: keyof Omit<BillHistory, "committeeReferrals">;
+  field: keyof Omit<
+    BillHistory,
+    "committeeReferrals" | "congressNum" | "sourceUrl"
+  >;
   prefix: string;
   delimeter?: string;
   optional?: boolean;
@@ -24,6 +24,8 @@ const sections: Section[] = [
 
 const END_MARKER = "ACTIONS TAKEN";
 const END_FIELD = "committeeReferrals";
+const BASE_PDF_URL =
+  "https://hrep-website.s3.ap-southeast-1.amazonaws.com/legisdocs/basic_19";
 
 // Special characters to replace
 const specialChars = [
@@ -180,9 +182,13 @@ export default function parseBillHistoryRows(
   const [remainingRows, partialHistory] = parseSections(rows);
   const endHistory = parseEnd(remainingRows);
 
+  const { billNum } = partialHistory;
+
   const billHistory = {
     ...partialHistory,
     ...endHistory,
+    congressNum: 19,
+    sourceUrl: `${BASE_PDF_URL}/${billNum}.pdf`,
   };
 
   return billHistory as BillHistory;

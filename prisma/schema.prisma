@@ -13,6 +13,7 @@ datasource db {
 model Bill {
   id                 String           @id @default(uuid()) @db.Uuid
   billNum            String
+  congressNum        Int
   title              String
   shortTitle         String?
   abstract           String?
@@ -21,13 +22,15 @@ model Bill {
   committeeReferrals String[]
 
   // OCR
-  fullText  String
+  fullText  String?
   sourceUrl String
 
   // Generated
-  summary         String
+  summary         String?
   stances         Stance[]
   billAuthorships BillAuthorship[]
+
+  @@unique([billNum, congressNum])
 }
 
 model Stance {

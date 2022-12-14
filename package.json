@@ -8,7 +8,7 @@
     "postinstall": "prisma generate",
     "lint": "next lint",
     "start": "next start",
-    "scraper:bill": "ts-node src/data/scraper/billHistory/index.ts",
+    "scraper:bill": "ts-node src/data/upload/index.ts",
     "prisma:generate": "prisma generate"
   },
   "dependencies": {
@@ -21,6 +21,7 @@
     "axios": "^1.2.0",
     "form-data": "^4.0.0",
     "next": "13.0.2",
+    "node-fetch": "^2.6.7",
     "node-html-parser": "^6.1.4",
     "puppeteer": "^19.4.0",
     "react": "18.2.0",
@@ -30,6 +31,7 @@
   },
   "devDependencies": {
     "@types/node": "^18.0.0",
+    "@types/node-fetch": "^2.6.2",
     "@types/react": "^18.0.14",
     "@types/react-dom": "^18.0.5",
     "@typescript-eslint/eslint-plugin": "^5.33.0",

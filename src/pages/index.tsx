@@ -1,11 +1,16 @@
 import { type NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
+import { useEffect } from "react";
 
 import { trpc } from "../utils/trpc";
 
 const Home: NextPage = () => {
-  const hello = trpc.example.hello.useQuery({ text: "from tRPC" });
+  const mutation = trpc.bill.createBill.useMutation();
+
+  useEffect(() => {
+    mutation.mutate({ billNum: "abc" });
+  }, []);
 
   return (
     <>
@@ -41,9 +46,7 @@ const Home: NextPage = () => {
               </div>
             </Link>
           </div>
-          <p className="text-2xl text-white">
-            {hello.data ? hello.data.greeting : "Loading tRPC query..."}
-          </p>
+          <p className="text-2xl text-white">Loading tRPC query...</p>
         </div>
       </main>
     </>
