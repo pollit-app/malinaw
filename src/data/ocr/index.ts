@@ -5,7 +5,7 @@ import scanBill from "./scanBill";
 import uploadBillText from "./uploadBillText";
 
 export const BASE_DIR = "./src/data/ocr";
-export const TMP_DIR = `${BASE_DIR}/tmp`;
+export const TMP_DIR = "./src/data/ocr/tmp";
 
 export type MinifiedBill = Pick<Bill, "id" | "sourceUrl" | "billNum">;
 

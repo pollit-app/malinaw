@@ -2,12 +2,11 @@ import axios from "axios";
 import { execFileSync } from "child_process";
 import { createWriteStream, existsSync, mkdirSync, rmSync } from "fs";
 import glob from "glob";
-import { BASE_DIR, MinifiedBill, TMP_DIR } from ".";
+import { MinifiedBill, TMP_DIR } from "./index";
 
-const TMP_PDF = `${TMP_DIR}/bill.pdf`;
-
-const SPLIT_SCRIPT = `${BASE_DIR}/scripts/split.sh`;
-const OCR_SCRIPT = `${BASE_DIR}/scripts/ocr.sh`;
+const TMP_PDF = "./src/data/ocr/tmp/bill.pdf";
+const SPLIT_SCRIPT = "./src/data/ocr/scripts/split.sh";
+const OCR_SCRIPT = "./src/data/ocr/scripts/ocr.sh";
 
 // Special characters to replace
 const replacementRules = [

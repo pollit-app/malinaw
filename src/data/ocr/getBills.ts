@@ -1,8 +1,5 @@
 import { prisma } from "../db/client";
 
-export const BASE_DIR = "./src/data/ocr";
-export const TMP_DIR = `${BASE_DIR}/tmp`;
-
 const BATCH_SIZE = 100;
 
 /**

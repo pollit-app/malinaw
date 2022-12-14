@@ -8,6 +8,7 @@ export default async function uploadBillText(
   bill: MinifiedBill,
   fullText: string
 ): Promise<void> {
+  console.log("Uploading bill", bill.billNum);
   await prisma.bill.update({
     where: {
       id: bill.id,
