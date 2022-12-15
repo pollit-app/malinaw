@@ -74,6 +74,7 @@ function runOcr(): string {
   console.log("Running OCR");
   const files = glob.sync(`${TMP_DIR}/*.png`);
   files.sort();
+  console.log(files.length, "images detected");
 
   const output = [];
   for (const fileName of files) {
@@ -85,17 +86,31 @@ function runOcr(): string {
 }
 
 /**
- * Apply the configured `replacementRules` to the input string
+ * Clean the text by applying the configured `replacementRules` to the input string
  */
 function cleanText(input: string): string {
   console.log("Cleaning text");
-  return replacementRules
+  const replaced = replacementRules
     .reduce(
       (curr: string, [pattern, replacement]) =>
         curr.replace(pattern, replacement),
       input
     )
     .trim();
+
+  const lines = replaced.split("\n");
+
+  // Each bill starts with "Republic of the Philippines"
+  // Remove any noise lines before this (usually from the stamp), if possible
+  const startIndex = lines.findIndex((line) =>
+    line.toLowerCase().includes("republic of the philippines")
+  );
+
+  if (startIndex != -1) {
+    return lines.slice(startIndex).join("\n").trim();
+  } else {
+    return replaced;
+  }
 }
 
 /**

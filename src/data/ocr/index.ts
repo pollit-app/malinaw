@@ -15,21 +15,18 @@ export type MinifiedBill = Pick<Bill, "id" | "sourceUrl" | "billNum">;
  */
 export default async function main() {
   const bills = getBills();
-  const errors = [];
   for await (const bill of bills) {
+    const start = new Date().getTime();
     try {
       const text = await scanBill(bill);
       await uploadBillText(bill, text);
+      console.log("Text length: ", text.length);
     } catch (err) {
       console.error(err);
-      errors.push(bill.billNum);
     }
+    const end = new Date().getTime();
+    console.log((end - start) / 1000, "s elapsed");
   }
-
-  writeFileSync(
-    `${BASE_DIR}/output/ocr_errors.json`,
-    JSON.stringify(errors, null, 2)
-  );
 }
 
 main();
