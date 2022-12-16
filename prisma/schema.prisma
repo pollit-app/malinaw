@@ -59,6 +59,8 @@ model BillAuthorship {
   bill           Bill               @relation(fields: [billId], references: [id])
   author         Politician         @relation(fields: [authorId], references: [id])
   authorshipType BillAuthorshipType
+
+  @@unique([billId, authorId])
 }
 
 enum BillSignificance {
