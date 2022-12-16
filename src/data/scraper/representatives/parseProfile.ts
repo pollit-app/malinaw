@@ -30,15 +30,18 @@ export default async function parseProfile(
   expect(text).not.toBeNull();
   const lines = text!.split("<br>");
   expect(lines.length).toBeGreaterThan(1);
-  expect(lines.length).toBeLessThan(4);
 
   const name = lines[0]!;
+
+  let role = "Party List Representative";
   let location = lines[1]!;
   if (lines.length == 3) {
+    role = lines[1]!;
     location = lines[2]!;
+  } else if (lines.length == 4) {
+    role = lines[2]!;
+    location = lines[3]!;
   }
-
-  const role = lines.length == 2 ? "Party List Representative" : lines[1]!;
 
   return {
     name,

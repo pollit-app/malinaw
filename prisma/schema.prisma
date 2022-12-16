@@ -46,7 +46,7 @@ model Politician {
   name     String
   role     String
   location String?
-  photoUrl String
+  photoUrl String?
 
   billAuthorships BillAuthorship[]
 }

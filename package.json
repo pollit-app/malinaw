@@ -9,8 +9,9 @@
     "lint": "next lint",
     "start": "next start",
     "prisma:generate": "prisma generate",
-    "scraper:bill": "ts-node src/data/upload/index.ts",
-    "scraper:congress": "ts-node src/data/scraper/representatives/index.ts",
+    "scraper": "ts-node src/data/upload/index.ts",
+    "scraper:bill": "npm run scraper -- bill",
+    "scraper:representatives": "npm run scraper -- representatives",
     "ocr": "ts-node src/data/ocr/index.ts"
   },
   "dependencies": {
@@ -21,6 +22,7 @@
     "@trpc/react-query": "^10.0.0",
     "@trpc/server": "^10.0.0",
     "axios": "^1.2.0",
+    "commander": "^9.4.1",
     "expect": "^29.3.1",
     "form-data": "^4.0.0",
     "glob": "^8.0.3",
