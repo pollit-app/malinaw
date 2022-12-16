@@ -1,21 +1,29 @@
 import { program } from "commander";
 import { prisma } from "../db/client";
 import uploadBillHistory from "./uploadBillHistory";
+import uploadCongressBillAuthorships from "./uploadCongressBillAuthorships";
 import uploadRepresentatives from "./uploadRepresentatives";
 
-type Task = "bill" | "representatives";
+/**
+ * Mapping of task names to task functions
+ */
+const tasks = {
+  congress: uploadRepresentatives,
+  congressBills: uploadBillHistory,
+  congressAuthorships: uploadCongressBillAuthorships,
+} as const;
+
+type Task = keyof typeof tasks;
 
 /**
  * Run one of the preconfigured parse and upload tasks
  */
 async function runTask(task: Task) {
-  if (task === "bill") {
-    await uploadBillHistory(prisma);
-  } else if (task === "representatives") {
-    await uploadRepresentatives(prisma);
-  } else {
+  if (!Object.hasOwn(tasks, task)) {
     throw new Error("Unknown task: " + task);
   }
+  const taskFn = tasks[task];
+  await taskFn(prisma);
 }
 
 program.argument("<task>", "task to run and upload").action(runTask);

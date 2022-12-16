@@ -1,8 +1,8 @@
 import { PrismaClient } from "@prisma/client";
 import { writeFileSync } from "fs";
-import parseBillHistoryRows from "../scraper/billHistory/billHistoryParser";
-import requestModal from "../scraper/billHistory/requestModal";
-import { loadRowIds } from "../scraper/billHistory/rowIds";
+import parseBillHistoryRows from "../scraper/congressBillHistory/billHistoryParser";
+import requestModal from "../scraper/congressBillHistory/requestModal";
+import { loadRowIds } from "../scraper/congressBillHistory/rowIds";
 
 const OUTPUT_FILE = "./src/data/upload/output/bill_history_errors.json";
 

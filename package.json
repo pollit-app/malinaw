@@ -10,8 +10,9 @@
     "start": "next start",
     "prisma:generate": "prisma generate",
     "scraper": "ts-node src/data/upload/index.ts",
-    "scraper:bill": "npm run scraper -- bill",
-    "scraper:representatives": "npm run scraper -- representatives",
+    "scraper:congress": "npm run scraper -- congress",
+    "scraper:congressBills": "npm run scraper -- congressBills",
+    "scraper:congressAuthorships": "npm run scraper -- congressAuthorships",
     "ocr": "ts-node src/data/ocr/index.ts"
   },
   "dependencies": {
