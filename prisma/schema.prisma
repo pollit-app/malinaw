@@ -42,10 +42,10 @@ model Stance {
 }
 
 model Politician {
-  id       String @id @default(uuid()) @db.Uuid
+  id       String  @id @default(uuid()) @db.Uuid
   name     String
   role     String
-  location String
+  location String?
   photoUrl String
 
   billAuthorships BillAuthorship[]
