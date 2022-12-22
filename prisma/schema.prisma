@@ -82,6 +82,8 @@ model BillCommitteeReferral {
 
   bill      Bill      @relation(fields: [billId], references: [id])
   committee Committee @relation(fields: [committeeId], references: [id])
+
+  @@unique([billId, committeeId, referralType])
 }
 
 model PoliticianCommiteeMembership {
@@ -92,6 +94,8 @@ model PoliticianCommiteeMembership {
 
   politician Politician @relation(fields: [politicianId], references: [id])
   committee  Committee  @relation(fields: [committeeId], references: [id])
+
+  @@unique([politicianId, committeeId])
 }
 
 enum BillReferralType {
