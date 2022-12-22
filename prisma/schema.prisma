@@ -11,15 +11,16 @@ datasource db {
 }
 
 model Bill {
-  id                 String           @id @default(uuid()) @db.Uuid
-  billNum            String
-  congressNum        Int
-  title              String
-  shortTitle         String?
-  abstract           String?
-  dateFiled          String
-  significance       BillSignificance
-  committeeReferrals String[]
+  id           String           @id @default(uuid()) @db.Uuid
+  billNum      String
+  congressNum  Int
+  title        String
+  shortTitle   String?
+  abstract     String?
+  dateFiled    String
+  significance BillSignificance
+
+  committeeReferrals BillCommitteeReferral[]
 
   // OCR
   fullText  String?
@@ -42,13 +43,23 @@ model Stance {
 }
 
 model Politician {
-  id       String  @id @default(uuid()) @db.Uuid
-  name     String
-  role     String
-  location String?
-  photoUrl String?
+  id         String  @id @default(uuid()) @db.Uuid
+  name       String
+  role       String
+  location   String?
+  photoUrl   String?
+  profileUrl String?
 
-  billAuthorships BillAuthorship[]
+  billAuthorships  BillAuthorship[]
+  memberCommittees PoliticianCommiteeMembership[]
+}
+
+model Committee {
+  id   String @id @default(uuid()) @db.Uuid
+  name String
+
+  referredBills                BillCommitteeReferral[]
+  PoliticianCommiteeMembership PoliticianCommiteeMembership[]
 }
 
 model BillAuthorship {
@@ -61,6 +72,36 @@ model BillAuthorship {
   authorshipType BillAuthorshipType
 
   @@unique([billId, authorId])
+}
+
+model BillCommitteeReferral {
+  id           String           @id @default(uuid()) @db.Uuid
+  billId       String           @db.Uuid
+  committeeId  String           @db.Uuid
+  referralType BillReferralType
+
+  bill      Bill      @relation(fields: [billId], references: [id])
+  committee Committee @relation(fields: [committeeId], references: [id])
+}
+
+model PoliticianCommiteeMembership {
+  id           String  @id @default(uuid()) @db.Uuid
+  politicianId String  @db.Uuid
+  committeeId  String  @db.Uuid
+  title        String?
+
+  politician Politician @relation(fields: [politicianId], references: [id])
+  committee  Committee  @relation(fields: [committeeId], references: [id])
+}
+
+enum BillReferralType {
+  PRIMARY
+  SECONDARY
+}
+
+enum CongressHouse {
+  SENATE
+  HOUSE_OF_REPRESENTATIVES
 }
 
 enum BillSignificance {
