@@ -53,8 +53,8 @@ model Committee {
   name  String
   house CongressHouse
 
-  referredBills                BillCommitteeReferral[]
-  PoliticianCommiteeMembership PoliticianCommiteeMembership[]
+  referredBills BillCommitteeReferral[]
+  members       PoliticianCommiteeMembership[]
 }
 
 // Represents a generated stance assigned to a bill
@@ -103,6 +103,7 @@ model PoliticianCommiteeMembership {
   @@unique([politicianId, committeeId])
 }
 
+// Enums
 enum BillReferralType {
   PRIMARY
   SECONDARY
