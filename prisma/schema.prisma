@@ -14,6 +14,7 @@ model Bill {
   id           String           @id @default(uuid()) @db.Uuid
   billNum      String
   congressNum  Int
+  house        CongressHouse
   title        String
   shortTitle   String?
   abstract     String?
@@ -34,6 +35,29 @@ model Bill {
   @@unique([billNum, congressNum])
 }
 
+model Politician {
+  id         String        @id @default(uuid()) @db.Uuid
+  name       String
+  role       String
+  location   String?
+  photoUrl   String?
+  profileUrl String?
+  house      CongressHouse
+
+  billAuthorships  BillAuthorship[]
+  memberCommittees PoliticianCommiteeMembership[]
+}
+
+model Committee {
+  id    String        @id @default(uuid()) @db.Uuid
+  name  String
+  house CongressHouse
+
+  referredBills                BillCommitteeReferral[]
+  PoliticianCommiteeMembership PoliticianCommiteeMembership[]
+}
+
+// Represents a generated stance assigned to a bill
 model Stance {
   id    String @id @default(uuid()) @db.Uuid
   name  String
@@ -42,26 +66,7 @@ model Stance {
   bills Bill[]
 }
 
-model Politician {
-  id         String  @id @default(uuid()) @db.Uuid
-  name       String
-  role       String
-  location   String?
-  photoUrl   String?
-  profileUrl String?
-
-  billAuthorships  BillAuthorship[]
-  memberCommittees PoliticianCommiteeMembership[]
-}
-
-model Committee {
-  id   String @id @default(uuid()) @db.Uuid
-  name String
-
-  referredBills                BillCommitteeReferral[]
-  PoliticianCommiteeMembership PoliticianCommiteeMembership[]
-}
-
+// Junction tables
 model BillAuthorship {
   id       String @id @default(uuid()) @db.Uuid
   billId   String @db.Uuid
