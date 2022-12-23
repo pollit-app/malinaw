@@ -1,8 +1,8 @@
 import { program } from "commander";
 import { prisma } from "../db/client";
-import uploadBillHistory from "./uploadBillHistory";
-import uploadCongressBillAuthorships from "./uploadCongressBillAuthorships";
-import uploadRepresentatives from "./uploadRepresentatives";
+import uploadBillHistory from "./house/uploadHouseBills";
+import uploadCongressBillAuthorships from "./house/uploadHouseBillAuthorships";
+import uploadRepresentatives from "./house/uploadHouseRepresentatives";
 
 /**
  * Mapping of task names to task functions

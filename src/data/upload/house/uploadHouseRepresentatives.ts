@@ -1,8 +1,8 @@
 import { PrismaClient } from "@prisma/client";
-import { getRepresentativeUrls } from "../scraper/representatives/listRepresentatives";
+import { getRepresentativeUrls } from "../scraper/house/members/listRepresentatives";
 import parseProfile, {
   ParsedPolitician,
-} from "../scraper/representatives/parseProfile";
+} from "../scraper/house/members/parseProfile";
 
 /**
  * Parse members of the House of Representatives and upload into database
