@@ -18,8 +18,8 @@ export default function ContentLayout({
           </span>
         </Link>
       </header>
-      <main className="space-around flex items-center">
-        <div className="w-11/12">{children}</div>
+      <main className="space-around flex h-screen justify-center bg-slate-300">
+        <div className="mt-10 w-10/12">{children}</div>
       </main>
     </>
   );
