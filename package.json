@@ -9,6 +9,7 @@
     "lint": "next lint",
     "start": "next start",
     "prisma:generate": "prisma generate",
+    "studio": "prisma studio",
     "scraper": "ts-node src/data/upload/index.ts",
     "scraper:congress": "npm run scraper -- congress",
     "scraper:congressBills": "npm run scraper -- congressBills",
