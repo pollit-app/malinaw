@@ -14,6 +14,7 @@
     "scraper:congressMembers": "npm run scraper -- congressMembers",
     "scraper:congressBills": "npm run scraper -- congressBills",
     "scraper:congressAuthorships": "npm run scraper -- congressAuthorships",
+    "scraper:congressCommittees": "npm run scraper -- congressCommittees",
     "ocr": "ts-node src/data/ocr/index.ts"
   },
   "dependencies": {

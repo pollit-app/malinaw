@@ -3,6 +3,7 @@ import { prisma } from "../db/client";
 import uploadBillHistory from "./house/uploadHouseBills";
 import uploadCongressBillAuthorships from "./house/uploadHouseBillAuthorships";
 import uploadRepresentatives from "./house/uploadHouseRepresentatives";
+import uploadCommittees from "./house/uploadCommittees";
 
 /**
  * Mapping of task names to task functions
@@ -11,6 +12,7 @@ const tasks = {
   congressMembers: uploadRepresentatives,
   congressBills: uploadBillHistory,
   congressAuthorships: uploadCongressBillAuthorships,
+  congressCommittees: uploadCommittees,
 } as const;
 
 type Task = keyof typeof tasks;
