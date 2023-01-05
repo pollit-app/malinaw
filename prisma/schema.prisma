@@ -11,15 +11,17 @@ datasource db {
 }
 
 model Bill {
-  id                 String           @id @default(uuid()) @db.Uuid
-  billNum            String
-  congressNum        Int
-  title              String
-  shortTitle         String?
-  abstract           String?
-  dateFiled          String
-  significance       BillSignificance
-  committeeReferrals String[]
+  id           String           @id @default(uuid()) @db.Uuid
+  billNum      String
+  congressNum  Int
+  house        CongressHouse    @default(HOUSE_OF_REPRESENTATIVES)
+  title        String
+  shortTitle   String?
+  abstract     String?
+  dateFiled    String
+  significance BillSignificance
+
+  committeeReferrals BillCommitteeReferral[]
 
   // OCR
   fullText  String?
@@ -33,6 +35,29 @@ model Bill {
   @@unique([billNum, congressNum])
 }
 
+model Politician {
+  id         String        @id @default(uuid()) @db.Uuid
+  house      CongressHouse @default(HOUSE_OF_REPRESENTATIVES)
+  name       String
+  role       String
+  location   String?
+  photoUrl   String?
+  profileUrl String?
+
+  billAuthorships  BillAuthorship[]
+  memberCommittees PoliticianCommiteeMembership[]
+}
+
+model Committee {
+  id    String        @id @default(uuid()) @db.Uuid
+  name  String
+  house CongressHouse
+
+  referredBills BillCommitteeReferral[]
+  members       PoliticianCommiteeMembership[]
+}
+
+// Represents a generated stance assigned to a bill
 model Stance {
   id    String @id @default(uuid()) @db.Uuid
   name  String
@@ -41,16 +66,7 @@ model Stance {
   bills Bill[]
 }
 
-model Politician {
-  id       String  @id @default(uuid()) @db.Uuid
-  name     String
-  role     String
-  location String?
-  photoUrl String?
-
-  billAuthorships BillAuthorship[]
-}
-
+// Junction tables
 model BillAuthorship {
   id       String @id @default(uuid()) @db.Uuid
   billId   String @db.Uuid
@@ -61,6 +77,41 @@ model BillAuthorship {
   authorshipType BillAuthorshipType
 
   @@unique([billId, authorId])
+}
+
+model BillCommitteeReferral {
+  id           String           @id @default(uuid()) @db.Uuid
+  billId       String           @db.Uuid
+  committeeId  String           @db.Uuid
+  referralType BillReferralType
+
+  bill      Bill      @relation(fields: [billId], references: [id])
+  committee Committee @relation(fields: [committeeId], references: [id])
+
+  @@unique([billId, committeeId, referralType])
+}
+
+model PoliticianCommiteeMembership {
+  id           String  @id @default(uuid()) @db.Uuid
+  politicianId String  @db.Uuid
+  committeeId  String  @db.Uuid
+  title        String?
+
+  politician Politician @relation(fields: [politicianId], references: [id])
+  committee  Committee  @relation(fields: [committeeId], references: [id])
+
+  @@unique([politicianId, committeeId])
+}
+
+// Enums
+enum BillReferralType {
+  PRIMARY
+  SECONDARY
+}
+
+enum CongressHouse {
+  SENATE
+  HOUSE_OF_REPRESENTATIVES
 }
 
 enum BillSignificance {
