@@ -11,7 +11,7 @@
     "prisma:generate": "prisma generate",
     "studio": "prisma studio",
     "scraper": "ts-node src/data/upload/index.ts",
-    "scraper:congress": "npm run scraper -- congress",
+    "scraper:congressMembers": "npm run scraper -- congressMembers",
     "scraper:congressBills": "npm run scraper -- congressBills",
     "scraper:congressAuthorships": "npm run scraper -- congressAuthorships",
     "ocr": "ts-node src/data/ocr/index.ts"

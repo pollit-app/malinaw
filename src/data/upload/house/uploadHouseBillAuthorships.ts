@@ -4,7 +4,6 @@ import {
   BillAuthorshipType,
   PrismaClient,
 } from "@prisma/client";
-import expect from "expect";
 import parseBillAuthorships from "../../scraper/house/billAuthorship/billAuthorshipParser";
 import { getRepresentativeUrls } from "../../scraper/house/members/listRepresentatives";
 

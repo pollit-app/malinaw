@@ -1,4 +1,4 @@
-import { Politician } from "@prisma/client";
+import { CongressHouse, Politician } from "@prisma/client";
 import axios from "axios";
 import expect from "expect";
 import { HTMLElement, parse } from "node-html-parser";
@@ -8,6 +8,8 @@ interface RepresentativeTitle {
   name: string;
   role: string;
   location: string;
+  additionalTitle: string | null;
+  partyList: string | null;
 }
 
 /**
@@ -24,23 +26,24 @@ export function parseRepresentativeTitle(
   expect(lines.length).toBeGreaterThan(1);
 
   const name = lines[0]!;
+  const representative = { name } as RepresentativeTitle;
+  lines.shift();
 
-  // Account for additional rows that occasionally appear
-  let role = "Party List Representative";
-  let location = lines[1]!;
-  if (lines.length == 3) {
-    role = lines[1]!;
-    location = lines[2]!;
-  } else if (lines.length == 4) {
-    role = lines[2]!;
-    location = lines[3]!;
+  if (lines[0]?.startsWith("<a")) {
+    // Additional title present
+    representative.additionalTitle = parse(lines[0] as string).text;
+    lines.shift();
   }
 
-  return {
-    name,
-    role,
-    location,
-  };
+  if (lines.length === 2) {
+    representative.role = lines[0]!;
+    representative.location = lines[1]!;
+  } else {
+    representative.role = "Party List Representative";
+    representative.partyList = lines[0]!;
+  }
+
+  return representative;
 }
 
 /**
@@ -63,12 +66,17 @@ export default async function parseProfile(
   // Extract designation information
   const titleContainer = profileContainer!.querySelector(".text-primary");
   expect(titleContainer).not.toBeNull();
-  const { name, role, location } = parseRepresentativeTitle(titleContainer!);
+  const { name, role, location, additionalTitle, partyList } =
+    parseRepresentativeTitle(titleContainer!);
 
   return {
     name,
     role,
     location,
     photoUrl,
+    house: CongressHouse.HOUSE_OF_REPRESENTATIVES,
+    profileUrl: url,
+    partyList,
+    additionalTitle,
   };
 }

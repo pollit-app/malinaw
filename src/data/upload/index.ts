@@ -8,7 +8,7 @@ import uploadRepresentatives from "./house/uploadHouseRepresentatives";
  * Mapping of task names to task functions
  */
 const tasks = {
-  congress: uploadRepresentatives,
+  congressMembers: uploadRepresentatives,
   congressBills: uploadBillHistory,
   congressAuthorships: uploadCongressBillAuthorships,
 } as const;
