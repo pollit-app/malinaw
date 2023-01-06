@@ -163,6 +163,16 @@ export default function PoliticianPage() {
                   {bill.shortTitle ??
                     lodash.startCase(bill.title?.toLowerCase() ?? "")}
                 </p>
+                <div className="mt-3 flex flex-row gap-2">
+                  {bill.committeeReferrals.map((referral) => (
+                    <p
+                      key={referral.committee.name}
+                      className="w-fit rounded-full bg-cyan-200 px-3 py-1 text-sm"
+                    >
+                      {referral.committee.name}
+                    </p>
+                  ))}
+                </div>
               </div>
             ))}
           </div>
