@@ -1,17 +1,8 @@
 import { type NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
-import { useEffect } from "react";
-
-import { trpc } from "../utils/trpc";
 
 const Home: NextPage = () => {
-  const mutation = trpc.bill.createBill.useMutation();
-
-  useEffect(() => {
-    mutation.mutate({ billNum: "abc" });
-  }, []);
-
   return (
     <>
       <Head>

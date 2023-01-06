@@ -1,9 +1,4 @@
-import {
-  Bill,
-  BillSignificance,
-  CongressHouse,
-  PrismaClient,
-} from "@prisma/client";
+import { type Bill, BillSignificance, CongressHouse } from "@prisma/client";
 
 export type BillHistory = Omit<Bill, "id" | "fullText" | "summary">;
 
@@ -101,7 +96,7 @@ function rowTextMatchesSection(text: string, section: Section): boolean {
 
 function parseSections(rows: HTMLTableRowElement[]): Partial<BillHistory> {
   // Reverse rows to pop from end
-  let acc = [...rows];
+  const acc = [...rows];
   acc.reverse();
   const billHistory = {} as Partial<BillHistory>;
 

@@ -1,7 +1,7 @@
-import { CongressHouse, Politician } from "@prisma/client";
+import { CongressHouse, type Politician } from "@prisma/client";
 import axios from "axios";
 import expect from "expect";
-import { HTMLElement, parse } from "node-html-parser";
+import { type HTMLElement, parse } from "node-html-parser";
 
 export type ParsedPolitician = Omit<Politician, "id">;
 interface RepresentativeTitle {
@@ -60,7 +60,7 @@ export default async function parseProfile(
 
   // Extract photoUrl
   const image = profileContainer!.querySelector("img");
-  const photoUrl = image?.getAttribute("src")!;
+  const photoUrl = image!.getAttribute("src")!;
   expect(photoUrl).not.toBeNull();
 
   // Extract designation information

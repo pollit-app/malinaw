@@ -13,5 +13,13 @@ const config = {
     locales: ["en"],
     defaultLocale: "en",
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "hrep-website.s3.ap-southeast-1.amazonaws.com",
+      },
+    ],
+  },
 };
 export default config;
