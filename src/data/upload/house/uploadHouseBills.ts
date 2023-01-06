@@ -6,6 +6,9 @@ import { loadRowIds } from "../../scraper/house/bills/rowIds";
 
 const OUTPUT_FILE = "./src/data/upload/output/bill_history_errors.json";
 
+/**
+ * Parse and upload bills from the House of Representatives
+ */
 export default async function uploadHouseBills(prisma: PrismaClient) {
   // Parse each page
   const errors = [];

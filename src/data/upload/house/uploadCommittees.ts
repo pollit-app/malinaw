@@ -2,7 +2,7 @@ import { PrismaClient } from "@prisma/client";
 import parseCommitteeLists from "../../scraper/house/committees/committeeListParser";
 
 /**
- * Parse members of the House of Representatives and upload into database
+ * Parse and upload the list of committees in the House of Representatives
  */
 export default async function uploadCommittees(
   prisma: PrismaClient
