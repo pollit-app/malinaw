@@ -1,5 +1,4 @@
-import {
-  Politician,
+import type {
   PoliticianCommiteeMembership,
   PrismaClient,
 } from "@prisma/client";
@@ -52,7 +51,7 @@ export default async function uploadCommitteeMemberships(
       (parsed) => committeeMapping[parsed.committee] != null
     );
 
-    let polMemberships = present.map((parsed) => ({
+    const polMemberships = present.map((parsed) => ({
       politicianId: politician.id,
       committeeId: committeeMapping[parsed.committee],
       title: parsed.title,
