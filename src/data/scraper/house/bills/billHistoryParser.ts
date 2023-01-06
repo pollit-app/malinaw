@@ -1,11 +1,16 @@
-import { Bill, BillSignificance, PrismaClient } from "@prisma/client";
+import {
+  Bill,
+  BillSignificance,
+  CongressHouse,
+  PrismaClient,
+} from "@prisma/client";
 
 export type BillHistory = Omit<Bill, "id" | "fullText" | "summary">;
 
 interface Section {
   field: keyof Omit<
     BillHistory,
-    "committeeReferrals" | "congressNum" | "sourceUrl"
+    "committeeReferrals" | "congressNum" | "sourceUrl" | "house"
   >;
   prefix: string;
   delimeter?: string;
@@ -94,9 +99,7 @@ function rowTextMatchesSection(text: string, section: Section): boolean {
   return text.startsWith(section.prefix);
 }
 
-function parseSections(
-  rows: HTMLTableRowElement[]
-): [HTMLTableRowElement[], Partial<BillHistory>] {
+function parseSections(rows: HTMLTableRowElement[]): Partial<BillHistory> {
   // Reverse rows to pop from end
   let acc = [...rows];
   acc.reverse();
@@ -145,49 +148,20 @@ function parseSections(
     }
   }
 
-  // Unreverse acc
-  acc.reverse();
-  return [acc, billHistory];
-}
-
-function parseEnd(rows: HTMLTableRowElement[]): Partial<BillHistory> {
-  let acc = rows;
-  const billHistory = {} as Partial<BillHistory>;
-  const matching = [];
-
-  while (acc.length > 0) {
-    const row = acc.pop();
-    try {
-      const rowText = extractTableRowText(row);
-
-      if (rowText.startsWith(END_MARKER)) {
-        // Marker reached. Break
-        break;
-      } else {
-        matching.push(rowText);
-      }
-    } catch (err) {
-      // Unable to parse text. Match failed
-      console.log("Unable to parse text");
-    }
-  }
-
-  billHistory[END_FIELD] = matching.reverse();
   return billHistory;
 }
 
 export default function parseBillHistoryRows(
   rows: HTMLTableRowElement[]
 ): BillHistory {
-  const [remainingRows, partialHistory] = parseSections(rows);
-  const endHistory = parseEnd(remainingRows);
+  const partialHistory = parseSections(rows);
 
   const { billNum } = partialHistory;
 
   const billHistory = {
     ...partialHistory,
-    ...endHistory,
     congressNum: 19,
+    house: CongressHouse.HOUSE_OF_REPRESENTATIVES,
     sourceUrl: `${BASE_PDF_URL}/${billNum}.pdf`,
   };
 

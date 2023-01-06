@@ -9,10 +9,13 @@
     "lint": "next lint",
     "start": "next start",
     "prisma:generate": "prisma generate",
+    "studio": "prisma studio",
     "scraper": "ts-node src/data/upload/index.ts",
-    "scraper:congress": "npm run scraper -- congress",
+    "scraper:congressMembers": "npm run scraper -- congressMembers",
     "scraper:congressBills": "npm run scraper -- congressBills",
     "scraper:congressAuthorships": "npm run scraper -- congressAuthorships",
+    "scraper:congressCommittees": "npm run scraper -- congressCommittees",
+    "scraper:congressCommitteeMemberships": "npm run scraper -- congressCommitteeMemberships",
     "ocr": "ts-node src/data/ocr/index.ts"
   },
   "dependencies": {

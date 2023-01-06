@@ -4,9 +4,8 @@ import {
   BillAuthorshipType,
   PrismaClient,
 } from "@prisma/client";
-import expect from "expect";
-import parseBillAuthorships from "../scraper/congressBillAuthorships/billAuthorshipParser";
-import { getRepresentativeUrls } from "../scraper/representatives/listRepresentatives";
+import parseBillAuthorships from "../../scraper/house/billAuthorship/billAuthorshipParser";
+import { getRepresentativeUrls } from "../../scraper/house/members/listRepresentatives";
 
 type ParsedBillAuthorship = Omit<BillAuthorship, "id">;
 

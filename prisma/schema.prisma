@@ -6,15 +6,16 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider          = "postgresql"
+  url               = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
 }
 
 model Bill {
   id           String           @id @default(uuid()) @db.Uuid
   billNum      String
   congressNum  Int
-  house        CongressHouse    @default(HOUSE_OF_REPRESENTATIVES)
+  house        CongressHouse
   title        String
   shortTitle   String?
   abstract     String?
@@ -37,12 +38,15 @@ model Bill {
 
 model Politician {
   id         String        @id @default(uuid()) @db.Uuid
-  house      CongressHouse @default(HOUSE_OF_REPRESENTATIVES)
+  house      CongressHouse
   name       String
   role       String
-  location   String?
-  photoUrl   String?
-  profileUrl String?
+  profileUrl String
+
+  additionalTitle String?
+  partyList       String?
+  location        String?
+  photoUrl        String?
 
   billAuthorships  BillAuthorship[]
   memberCommittees PoliticianCommiteeMembership[]
