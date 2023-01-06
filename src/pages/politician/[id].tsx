@@ -1,66 +1,94 @@
 import { useRouter } from "next/router";
 import ContentLayout from "../../components/layouts/ContentLayout";
 import { LinkIcon } from "@heroicons/react/24/outline";
+import { trpc } from "../../utils/trpc";
+import { CongressHouse } from "@prisma/client";
+import clsx from "clsx";
 
 export default function PoliticianPage() {
   const router = useRouter();
   const { id } = router.query;
 
-  // const { isLoading, isError, isSuccess, error, data } =
-  //   trpc.politician.getPoliticianData.useQuery({
-  //     id: id as string,
-  //   });
+  const { isLoading, isError, error, data } =
+    trpc.politician.getPoliticianData.useQuery({
+      id: id as string,
+    });
 
-  // if (isLoading) {
-  //   return "Loading";
-  // } else if (isError) {
-  //   console.log(error.message);
-  //   return error.message;
-  // }
+  if (isError) {
+    console.error(error);
+  }
 
-  // const { politician, billsAuthored } = data;
+  const {
+    house,
+    name,
+    role,
+    profileUrl,
+    additionalTitle,
+    partyList,
+    location,
+    photoUrl,
+    billAuthorships,
+    memberCommittees,
+  } = data ?? {};
 
-  const name = "Abalos, JC";
-  const designation = "House of Representatives";
-  const party = "Party List, 4PS";
+  const committees =
+    memberCommittees?.map((membership) => membership.committee.name) ?? [];
 
-  const committees = ["Agriculture and Food", "Economic Affairs"];
-  const tags = ["Health", "Ecology"];
+  const designation =
+    house == null
+      ? null
+      : house === CongressHouse.HOUSE_OF_REPRESENTATIVES
+      ? "House of Representatives"
+      : "Senate";
 
-  const bills = [
-    {
-      billNum: "HB00024",
-      url: "#",
-      tags: ["Health", "Ecology"],
-      shortTitle: "Leyte Ecological Industrial Zone Act",
-    },
-    {
-      billNum: "HB00025",
-      url: "#",
-      tags: ["Health", "Welfare", "Charity"],
-      title:
-        "An Act Providing a Free Childcare Center in Barangay Kaligayahan, Quezon City An Act Providing a Free Childcare Center in Barangay Kaligayahan, Quezon City...",
-    },
-  ];
+  // const tags = ["Health", "Ecology"];
+  const tags = [] as string[];
+  const bills = billAuthorships?.map((authorship) => authorship.bill) ?? [];
+  bills.sort((billA, billB) => billA.billNum.localeCompare(billB.billNum));
 
   return (
     <ContentLayout>
-      <div className="flex flex-row justify-between gap-10">
-        <aside className="flex w-3/12 flex-col rounded-3xl bg-white">
+      <div
+        className={clsx(
+          "flex flex-row justify-between gap-10",
+          isLoading ? "animate-pulse" : null
+        )}
+      >
+        <aside className="flex h-fit w-3/12 flex-col rounded-3xl bg-white">
           <img
-            src="/user.png"
+            src={photoUrl ?? "/user.png"}
             className="w-100 aspect-square rounded-t-3xl object-cover object-top"
           />
           <div className="p-5">
-            <p className="text-3xl font-bold">{name}</p>
+            <a
+              className="text-2xl font-bold text-sky-500"
+              href={profileUrl ?? "#"}
+              target="_blank"
+              rel="noreferrer"
+            >
+              {name}
+            </a>
             <p>{designation}</p>
-            <p>{party}</p>
+            {additionalTitle == null ? null : <p>{additionalTitle}</p>}
+            {partyList == null ? (
+              <>
+                <p className="text-sm">{role}</p>
+                <p className="text-sm">{location}</p>
+              </>
+            ) : (
+              <p className="text-sm">{partyList}</p>
+            )}
           </div>
 
           <div className="p-5">
-            <p className="text-xl font-bold">Committees</p>
+            {committees.length == 0 ? null : (
+              <p className="text-xl font-bold">Committees</p>
+            )}
             {committees.map((committee) => (
-              <p className="mt-3 w-fit rounded-full bg-cyan-200 px-3 py-1 text-sm">
+              <p
+                className="mt-3 w-fit rounded-full bg-cyan-200 px-3 py-1 text-sm"
+                key={committee}
+              >
                 {committee}
               </p>
             ))}
@@ -70,22 +98,30 @@ export default function PoliticianPage() {
         <section className="flex w-9/12 flex-col gap-5 rounded-3xl bg-white py-5 px-10">
           <div className="flex flex-row gap-3">
             {tags.map((tag) => (
-              <p className="mt-3 w-fit rounded-full bg-gray-300 px-3 py-1 text-sm">
+              <p
+                className="mt-3 w-fit rounded-full bg-emerald-400 px-3 py-1 text-sm"
+                key={tag}
+              >
                 {tag}
               </p>
             ))}
           </div>
           <div className="flex flex-col gap-5">
             {bills.map((bill) => (
-              <div className="rounded-3xl bg-slate-300 px-5 py-3">
+              <div
+                className="rounded-3xl bg-slate-200 px-5 py-3"
+                key={`bill-${bill.billNum}`}
+              >
                 <a
-                  href={bill.url}
-                  className="flex flex-row items-center gap-2 font-bold transition-colors hover:text-sky-400"
+                  href={`/bill/${bill.id}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex flex-row items-center gap-2 font-bold text-sky-500 transition-transform hover:translate-y-[-2px]"
                 >
                   {bill.billNum}
                   <LinkIcon className="h-4 w-4" />
                 </a>
-                <p className="w-100 truncate">
+                <p className="w-100 truncate capitalize">
                   {bill.shortTitle ?? bill.title}
                 </p>
               </div>

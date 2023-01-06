@@ -6,21 +6,24 @@ export const politicianRouter = router({
   getPoliticianData: publicProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
-      const politician = await prisma?.politician.findUniqueOrThrow({
+      const politician = await ctx.prisma?.politician.findUniqueOrThrow({
         where: {
           id: input.id,
         },
-      });
-
-      const bills = await prisma?.billAuthorship.findMany({
-        where: {
-          authorId: input.id,
-        },
         include: {
-          bill: true,
+          billAuthorships: {
+            include: {
+              bill: true,
+            },
+          },
+          memberCommittees: {
+            include: {
+              committee: true,
+            },
+          },
         },
       });
 
-      return { politician, billsAuthored: bills };
+      return politician;
     }),
 });
