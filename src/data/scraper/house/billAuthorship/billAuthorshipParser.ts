@@ -1,7 +1,7 @@
 import axios from "axios";
 import expect from "expect";
 import { parse } from "node-html-parser";
-import { parseRepresentativeTitle } from "../representatives/parseProfile";
+import { parseRepresentativeTitle } from "../members/parseProfile";
 
 export interface BillAuthorships {
   name: string;

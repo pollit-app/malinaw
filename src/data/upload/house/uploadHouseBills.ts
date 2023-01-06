@@ -1,12 +1,15 @@
 import { PrismaClient } from "@prisma/client";
 import { writeFileSync } from "fs";
-import parseBillHistoryRows from "../scraper/congressBillHistory/billHistoryParser";
-import requestModal from "../scraper/congressBillHistory/requestModal";
-import { loadRowIds } from "../scraper/congressBillHistory/rowIds";
+import parseBillHistoryRows from "../../scraper/house/bills/billHistoryParser";
+import requestModal from "../../scraper/house/bills/requestModal";
+import { loadRowIds } from "../../scraper/house/bills/rowIds";
 
 const OUTPUT_FILE = "./src/data/upload/output/bill_history_errors.json";
 
-export default async function uploadBillHistory(prisma: PrismaClient) {
+/**
+ * Parse and upload bills from the House of Representatives
+ */
+export default async function uploadHouseBills(prisma: PrismaClient) {
   // Parse each page
   const errors = [];
   let counter = 0;

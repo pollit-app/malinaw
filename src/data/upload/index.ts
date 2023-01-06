@@ -1,16 +1,20 @@
 import { program } from "commander";
 import { prisma } from "../db/client";
-import uploadBillHistory from "./uploadBillHistory";
-import uploadCongressBillAuthorships from "./uploadCongressBillAuthorships";
-import uploadRepresentatives from "./uploadRepresentatives";
+import uploadBillHistory from "./house/uploadHouseBills";
+import uploadCongressBillAuthorships from "./house/uploadHouseBillAuthorships";
+import uploadRepresentatives from "./house/uploadHouseRepresentatives";
+import uploadCommittees from "./house/uploadCommittees";
+import uploadCommitteeMemberships from "./house/uploadCommitteeMemberships";
 
 /**
  * Mapping of task names to task functions
  */
 const tasks = {
-  congress: uploadRepresentatives,
+  congressMembers: uploadRepresentatives,
   congressBills: uploadBillHistory,
   congressAuthorships: uploadCongressBillAuthorships,
+  congressCommittees: uploadCommittees,
+  congressCommitteeMemberships: uploadCommitteeMemberships,
 } as const;
 
 type Task = keyof typeof tasks;
