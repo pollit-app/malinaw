@@ -20,6 +20,7 @@ export default function PoliticianPage() {
     return error;
   }
 
+  const { politician, topStances } = data ?? {};
   const {
     house,
     name,
@@ -31,7 +32,7 @@ export default function PoliticianPage() {
     photoUrl,
     billAuthorships,
     memberCommittees,
-  } = data ?? {};
+  } = politician ?? {};
 
   const committees =
     memberCommittees?.map((membership) => membership.committee.name) ?? [];
@@ -43,10 +44,10 @@ export default function PoliticianPage() {
       ? "House of Representatives"
       : "Senate";
 
-  // const tags = ["Health", "Ecology"];
-  const tags = [] as string[];
+  const tags = topStances?.slice(0, 5) ?? [];
   const bills = billAuthorships?.map((authorship) => authorship.bill) ?? [];
   bills.sort((billA, billB) => billA.billNum.localeCompare(billB.billNum));
+  console.log(bills);
 
   return (
     <ContentLayout>
@@ -103,7 +104,7 @@ export default function PoliticianPage() {
 
         {/* Main content */}
         <section className="w-12/12 flex flex-col gap-5 rounded-3xl bg-white py-5 px-10 md:w-9/12">
-          <div className="flex flex-row gap-3">
+          <div className="flex flex-row flex-wrap gap-2">
             {tags.map((tag) => (
               <p
                 className="mt-3 w-fit rounded-full bg-emerald-400 px-3 py-1 text-sm"
