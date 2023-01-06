@@ -26,7 +26,7 @@ export default function ContentLayout({
         </Link>
       </header>
       <main className="space-around flex min-h-screen justify-center bg-slate-300">
-        <div className="w-[95%] py-10 md:w-10/12">{children}</div>
+        <div className="w-[95%] py-10 md:w-11/12 lg:w-10/12">{children}</div>
       </main>
     </>
   );

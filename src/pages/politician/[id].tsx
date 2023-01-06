@@ -5,6 +5,7 @@ import { trpc } from "../../utils/trpc";
 import { CongressHouse } from "@prisma/client";
 import clsx from "clsx";
 import Image from "next/image";
+import lodash from "lodash";
 
 export default function PoliticianPage() {
   const router = useRouter();
@@ -36,6 +37,9 @@ export default function PoliticianPage() {
 
   const committees =
     memberCommittees?.map((membership) => membership.committee.name) ?? [];
+  committees.sort(
+    (committeeA, committeeB) => committeeA.length - committeeB.length
+  );
 
   const designation =
     house == null
@@ -53,7 +57,7 @@ export default function PoliticianPage() {
     <ContentLayout>
       <div
         className={clsx(
-          "flex flex-col justify-between gap-3 md:flex-row md:gap-10",
+          "flex flex-col justify-between gap-3 md:flex-row md:gap-5 lg:gap-10",
           isLoading ? "animate-pulse" : null
         )}
       >
@@ -91,14 +95,16 @@ export default function PoliticianPage() {
             {committees.length == 0 ? null : (
               <p className="text-xl font-bold">Committees</p>
             )}
-            {committees.map((committee) => (
-              <p
-                className="mt-3 w-fit rounded-full bg-cyan-200 px-3 py-1 text-sm"
-                key={committee}
-              >
-                {committee}
-              </p>
-            ))}
+            <div className="flex flex-row flex-wrap gap-1">
+              {committees.map((committee) => (
+                <p
+                  className="mt-3 w-fit rounded-full bg-cyan-200 px-3 py-1 text-sm"
+                  key={committee}
+                >
+                  {committee}
+                </p>
+              ))}
+            </div>
           </div>
         </aside>
 
@@ -129,8 +135,9 @@ export default function PoliticianPage() {
                   {bill.billNum}
                   <LinkIcon className="h-4 w-4" />
                 </a>
-                <p className="w-100 truncate capitalize">
-                  {bill.shortTitle ?? bill.title}
+                <p className="w-100 line-clamp-3 lg:line-clamp-2">
+                  {bill.shortTitle ??
+                    lodash.startCase(bill.title?.toLowerCase() ?? "")}
                 </p>
               </div>
             ))}
