@@ -63,13 +63,25 @@ export default function PoliticianPage() {
       >
         {/* Profile box */}
         <aside className="w-12/12 flex h-fit flex-col rounded-3xl bg-white md:w-3/12">
-          <Image
-            src={photoUrl ?? "/user.png"}
-            className="w-100 aspect-square rounded-t-3xl object-cover object-top"
-            width={512}
-            height={512}
-            alt="Politician photo"
-          />
+          {isLoading ? (
+            <>
+              <div className="w-100 m-3 h-[15rem] rounded-3xl bg-gray-200" />
+              <div className="w-100 m-3 h-2 rounded-full bg-gray-200" />
+              <div className="w-100 m-3 h-2 rounded-full bg-gray-200" />
+              <div className="w-100 m-3 h-2 rounded-full bg-gray-200" />
+            </>
+          ) : (
+            <>
+              <Image
+                src={photoUrl ?? "/user.png"}
+                className="w-100 aspect-square rounded-t-3xl object-cover object-top"
+                width={512}
+                height={512}
+                alt="Politician photo"
+              />
+            </>
+          )}
+
           <div className="p-5">
             <a
               className="text-2xl font-bold text-sky-500"
@@ -121,6 +133,18 @@ export default function PoliticianPage() {
             ))}
           </div>
           <div className="flex flex-col gap-5">
+            {isLoading ? (
+              <>
+                <div className="w-100 flex flex-row gap-3">
+                  <div className="h-10 w-28 rounded-2xl bg-gray-200" />
+                  <div className="h-10 w-28 rounded-2xl bg-gray-200" />
+                  <div className="h-10 w-28 rounded-2xl bg-gray-200" />
+                </div>
+                <div className="w-100 m-3 h-28 rounded-3xl bg-gray-200" />
+                <div className="w-100 m-3 h-28 rounded-3xl bg-gray-200" />
+                <div className="w-100 m-3 h-28 rounded-3xl bg-gray-200" />
+              </>
+            ) : null}
             {bills.map((bill) => (
               <div
                 className="rounded-3xl bg-slate-200 px-5 py-3"
