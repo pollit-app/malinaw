@@ -4,6 +4,7 @@ import { LinkIcon } from "@heroicons/react/24/outline";
 import { trpc } from "../../utils/trpc";
 import { CongressHouse } from "@prisma/client";
 import clsx from "clsx";
+import Image from "next/image";
 
 export default function PoliticianPage() {
   const router = useRouter();
@@ -16,6 +17,7 @@ export default function PoliticianPage() {
 
   if (isError) {
     console.error(error);
+    return error;
   }
 
   const {
@@ -50,14 +52,18 @@ export default function PoliticianPage() {
     <ContentLayout>
       <div
         className={clsx(
-          "flex flex-row justify-between gap-10",
+          "flex flex-col justify-between gap-3 md:flex-row md:gap-10",
           isLoading ? "animate-pulse" : null
         )}
       >
-        <aside className="flex h-fit w-3/12 flex-col rounded-3xl bg-white">
-          <img
+        {/* Profile box */}
+        <aside className="w-12/12 flex h-fit flex-col rounded-3xl bg-white md:w-3/12">
+          <Image
             src={photoUrl ?? "/user.png"}
             className="w-100 aspect-square rounded-t-3xl object-cover object-top"
+            width={512}
+            height={512}
+            alt="Politician photo"
           />
           <div className="p-5">
             <a
@@ -95,7 +101,8 @@ export default function PoliticianPage() {
           </div>
         </aside>
 
-        <section className="flex w-9/12 flex-col gap-5 rounded-3xl bg-white py-5 px-10">
+        {/* Main content */}
+        <section className="w-12/12 flex flex-col gap-5 rounded-3xl bg-white py-5 px-10 md:w-9/12">
           <div className="flex flex-row gap-3">
             {tags.map((tag) => (
               <p
