@@ -5,6 +5,7 @@ import uploadCongressBillAuthorships from "./house/uploadHouseBillAuthorships";
 import uploadRepresentatives from "./house/uploadHouseRepresentatives";
 import uploadCommittees from "./house/uploadCommittees";
 import uploadCommitteeMemberships from "./house/uploadCommitteeMemberships";
+import uploadCommitteeBills from "./house/uploadCommitteeBills";
 
 /**
  * Mapping of task names to task functions
@@ -15,6 +16,7 @@ const tasks = {
   congressAuthorships: uploadCongressBillAuthorships,
   congressCommittees: uploadCommittees,
   congressCommitteeMemberships: uploadCommitteeMemberships,
+  congressCommitteeBills: uploadCommitteeBills,
 } as const;
 
 type Task = keyof typeof tasks;
