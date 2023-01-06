@@ -6,7 +6,7 @@ import { trpc } from "../utils/trpc";
 
 import "../styles/globals.css";
 
-const inter = Inter();
+const inter = Inter({ subsets: ["latin"] });
 const zillaSlab = Zilla_Slab({ weight: "600", subsets: ["latin"] });
 
 const MyApp: AppType = ({ Component, pageProps }) => {
