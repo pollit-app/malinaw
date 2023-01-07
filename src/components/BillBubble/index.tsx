@@ -5,10 +5,9 @@ import lodash from "lodash";
 import type { ReactElement } from "react";
 
 type PopulatedBill = Bill & {
-  committeeReferrals: BillCommitteeReferral &
-    {
-      committee: Committee;
-    }[];
+  committeeReferrals: (BillCommitteeReferral & {
+    committee: Committee;
+  })[];
 };
 
 export interface BillBubbleProps {
@@ -53,7 +52,7 @@ export default function BillBubble({
       <p className="w-100 line-clamp-3 lg:line-clamp-2">
         {bill.shortTitle ?? lodash.startCase(bill.title?.toLowerCase() ?? "")}
       </p>
-      <div className="mt-3 flex flex-row gap-2">
+      <div className="mt-3 flex flex-row flex-wrap gap-2">
         {committeeReferrals.map((referral) => (
           <p
             key={referral.committee.name}

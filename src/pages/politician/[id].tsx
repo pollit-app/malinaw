@@ -7,6 +7,7 @@ import clsx from "clsx";
 import Image from "next/image";
 import lodash from "lodash";
 import Chip from "../../components/Chip";
+import BillBubble from "../../components/BillBubble";
 
 export default function PoliticianPage() {
   const router = useRouter();
@@ -52,7 +53,6 @@ export default function PoliticianPage() {
   const tags = topStances?.slice(0, 5) ?? [];
   const bills = billAuthorships?.map((authorship) => authorship.bill) ?? [];
   bills.sort((billA, billB) => billA.billNum.localeCompare(billB.billNum));
-  console.log(bills);
 
   return (
     <ContentLayout>
@@ -124,6 +124,7 @@ export default function PoliticianPage() {
             ))}
           </div>
           <div className="flex flex-col gap-5">
+            {/* Loading placeholder */}
             {isLoading ? (
               <>
                 <div className="w-100 flex flex-row gap-3">
@@ -136,35 +137,13 @@ export default function PoliticianPage() {
                 <div className="w-100 m-3 h-28 rounded-3xl bg-gray-200" />
               </>
             ) : null}
+
+            {/* Bill content */}
+            {isLoading ? null : (
+              <p className="font-bold">{bills.length} bills published</p>
+            )}
             {bills.map((bill) => (
-              <div
-                className="rounded-3xl bg-slate-200 px-5 py-3"
-                key={`bill-${bill.billNum}`}
-              >
-                <a
-                  href={`/bill/${bill.id}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex flex-row items-center gap-2 font-bold text-sky-500 transition-transform hover:translate-y-[-2px]"
-                >
-                  {bill.billNum}
-                  <LinkIcon className="h-4 w-4" />
-                </a>
-                <p className="w-100 line-clamp-3 lg:line-clamp-2">
-                  {bill.shortTitle ??
-                    lodash.startCase(bill.title?.toLowerCase() ?? "")}
-                </p>
-                <div className="mt-3 flex flex-row gap-2">
-                  {bill.committeeReferrals.map((referral) => (
-                    <p
-                      key={referral.committee.name}
-                      className="w-fit rounded-full bg-cyan-200 px-3 py-1 text-sm"
-                    >
-                      {referral.committee.name}
-                    </p>
-                  ))}
-                </div>
-              </div>
+              <BillBubble bill={bill} populated key={bill.id} />
             ))}
           </div>
         </section>
