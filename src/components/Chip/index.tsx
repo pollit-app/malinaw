@@ -14,7 +14,8 @@ export default function Chip({ text, className }: ChipProps): ReactElement {
     <p
       className={clsx(
         className,
-        "mt-3 w-fit rounded-full bg-cyan-200 px-3 py-1 text-sm"
+        "mt-3 w-fit rounded-full px-3 py-1 text-sm",
+        className?.includes("bg-") ? null : "bg-cyan-200"
       )}
     >
       {text}

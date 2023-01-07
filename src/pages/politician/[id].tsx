@@ -1,5 +1,5 @@
 import { useRouter } from "next/router";
-import ContentLayout from "../../components/layouts/ContentLayout";
+import ContentLayout from "../../layouts/ContentLayout";
 import { LinkIcon } from "@heroicons/react/24/outline";
 import { trpc } from "../../utils/trpc";
 import { CongressHouse } from "@prisma/client";

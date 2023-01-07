@@ -1,4 +1,4 @@
-import { Committee } from "@prisma/client";
+import type { Bill, Committee, Politician } from "@prisma/client";
 import { z } from "zod";
 import { publicProcedure, router } from "../trpc";
 
@@ -8,6 +8,7 @@ interface SearchField {
 
 interface FindManyArgs<T> {
   where?: Record<keyof T, SearchField>;
+  take?: number;
 }
 
 interface SearchSchema<T> {
@@ -20,34 +21,42 @@ interface SearchSchema<T> {
 async function searchFields<T>(
   schema: SearchSchema<unknown>,
   query: string,
-  fields: (keyof T)[]
+  fields: (keyof T)[],
+  limit?: number
 ): Promise<T[]> {
   const searchFields = {} as Record<keyof T, SearchField>;
   for (const field of fields) {
     searchFields[field] = { search: query };
   }
 
-  return schema.findMany({ where: searchFields }) as unknown as T[];
+  return schema.findMany({
+    where: searchFields,
+    take: limit,
+  }) as unknown as T[];
 }
 
 export const searchRouter = router({
   search: publicProcedure
     .input(z.object({ query: z.string() }))
     .query(async ({ ctx, input }) => {
-      const committees = await searchFields(ctx.prisma.committee, input.query, [
-        "name",
-      ]);
+      const committees = await searchFields<Committee>(
+        ctx.prisma.committee,
+        input.query,
+        ["name"]
+      );
 
-      const bills = await searchFields(ctx.prisma.bill, input.query, [
-        "billNum",
-        // "shortTitle",
-        // "title",
-      ]);
+      const bills = await searchFields<Bill>(
+        ctx.prisma.bill,
+        input.query,
+        ["billNum", "shortTitle", "title"],
+        5
+      );
 
-      const politicians = await searchFields(
+      const politicians = await searchFields<Politician>(
         ctx.prisma.politician,
         input.query,
-        ["name", "role", "location"]
+        ["name", "role", "location"],
+        5
       );
 
       console.log("Query", input.query);

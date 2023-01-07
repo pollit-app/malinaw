@@ -1,8 +1,9 @@
 import { useRouter } from "next/router";
 import Chip from "../components/Chip";
-import ContentLayout from "../components/layouts/ContentLayout";
+import ContentLayout from "../layouts/ContentLayout";
 import SearchBar from "../components/SearchBar";
 import { trpc } from "../utils/trpc";
+import BillBubble from "../components/BillBubble";
 
 export default function PoliticianPage() {
   const router = useRouter();
@@ -34,13 +35,16 @@ export default function PoliticianPage() {
       {/* Tags */}
       <div className="flex flex-row flex-wrap gap-2">
         {committees.map((committee) => (
-          <Chip
-            text={committee.name}
-            key={committee.name}
-            className="bg-red-100"
-          />
+          <Chip text={committee.name} key={committee.name} />
         ))}
       </div>
+      {/* Bills */}
+      <div className="mt-5 flex flex-col gap-5">
+        {bills.map((bill) => (
+          <BillBubble bill={bill} key={bill.billNum} className="bg-white" />
+        ))}
+      </div>
+      {/* Politicians */}
     </ContentLayout>
   );
 }
