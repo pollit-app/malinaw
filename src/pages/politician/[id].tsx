@@ -6,6 +6,7 @@ import { CongressHouse } from "@prisma/client";
 import clsx from "clsx";
 import Image from "next/image";
 import lodash from "lodash";
+import Chip from "../../components/Chip";
 
 export default function PoliticianPage() {
   const router = useRouter();
@@ -109,12 +110,7 @@ export default function PoliticianPage() {
             )}
             <div className="flex flex-row flex-wrap gap-1">
               {committees.map((committee) => (
-                <p
-                  className="mt-3 w-fit rounded-full bg-cyan-200 px-3 py-1 text-sm"
-                  key={committee}
-                >
-                  {committee}
-                </p>
+                <Chip text={committee} key={committee} />
               ))}
             </div>
           </div>
@@ -124,12 +120,7 @@ export default function PoliticianPage() {
         <section className="w-12/12 flex flex-col gap-5 rounded-3xl bg-white py-5 px-10 md:w-9/12">
           <div className="flex flex-row flex-wrap gap-2">
             {tags.map((tag) => (
-              <p
-                className="mt-3 w-fit rounded-full bg-emerald-400 px-3 py-1 text-sm"
-                key={tag}
-              >
-                {tag}
-              </p>
+              <Chip text={tag} key={tag} className="bg-emerald-400" />
             ))}
           </div>
           <div className="flex flex-col gap-5">

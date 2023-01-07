@@ -19,11 +19,9 @@ const sections: Section[] = [
   { field: "shortTitle", prefix: "SHORT TITLE", optional: true },
   { field: "abstract", prefix: "ABSTRACT", optional: true },
   { field: "dateFiled", prefix: "DATE FILED" },
-  { field: "significance", prefix: "SIGNIFICANCE" },
+  { field: "significance", prefix: "SIGNIFICANCE", optional: true },
 ];
 
-const END_MARKER = "ACTIONS TAKEN";
-const END_FIELD = "committeeReferrals";
 const BASE_PDF_URL =
   "https://hrep-website.s3.ap-southeast-1.amazonaws.com/legisdocs/basic_19";
 

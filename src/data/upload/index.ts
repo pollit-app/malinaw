@@ -6,11 +6,19 @@ import uploadRepresentatives from "./house/uploadHouseRepresentatives";
 import uploadCommittees from "./house/uploadCommittees";
 import uploadCommitteeMemberships from "./house/uploadCommitteeMemberships";
 import uploadCommitteeBills from "./house/uploadCommitteeBills";
+import { PrismaClient } from "@prisma/client";
 
 /**
  * Mapping of task names to task functions
  */
 const tasks = {
+  all: async (prisma: PrismaClient) => {
+    await uploadBillHistory(prisma);
+    await uploadRepresentatives(prisma);
+    await uploadCommittees(prisma);
+    await uploadCommitteeMemberships(prisma);
+    await uploadCommitteeBills(prisma);
+  },
   congressMembers: uploadRepresentatives,
   congressBills: uploadBillHistory,
   congressAuthorships: uploadCongressBillAuthorships,
