@@ -15,7 +15,9 @@ export default function SearchBar({
   const [query, setQuery] = useState(startQuery);
 
   return (
-    <label className={clsx("relative block w-4/12", className)}>
+    <label
+      className={clsx("w-12/12 relative block md:w-8/12 lg:w-4/12", className)}
+    >
       <span className="sr-only">Search</span>
       <span className="absolute inset-y-0 left-0 flex items-center px-2">
         <svg

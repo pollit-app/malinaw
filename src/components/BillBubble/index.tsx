@@ -40,7 +40,6 @@ export default function BillBubble({
         "rounded-3xl px-5 py-3",
         className?.includes("bg-") ? null : "bg-slate-200"
       )}
-      key={`bill-${bill.billNum}`}
     >
       <a
         href={`/bill/${bill.id}`}

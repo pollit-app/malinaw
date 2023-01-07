@@ -59,8 +59,6 @@ export const searchRouter = router({
         5
       );
 
-      console.log("Query", input.query);
-      console.log("Results", { committees, bills, politicians });
       return { committees, bills, politicians };
     }),
 });

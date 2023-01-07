@@ -15,6 +15,7 @@ const tasks = {
   all: async (prisma: PrismaClient) => {
     await uploadBillHistory(prisma);
     await uploadRepresentatives(prisma);
+    await uploadCongressBillAuthorships(prisma);
     await uploadCommittees(prisma);
     await uploadCommitteeMemberships(prisma);
     await uploadCommitteeBills(prisma);
