@@ -14,8 +14,6 @@ export default function PoliticianPage() {
     query: startQuery as string,
   });
 
-  console.log(data);
-
   const { politicians, bills, committees } = data ?? {
     politicians: [],
     bills: [],
@@ -35,32 +33,55 @@ export default function PoliticianPage() {
       />
 
       {/* Tags */}
-      <div className="flex flex-row flex-wrap gap-2">
-        {committees.map((committee) => (
-          <Chip text={committee.name} key={committee.name} />
-        ))}
+      <div className="mt-5 flex flex-row flex-wrap gap-2">
+        {/* Loading spinner */}
+        {isLoading ? (
+          <div className="w-100 flex animate-pulse flex-row gap-3">
+            <div className="h-10 w-28 rounded-2xl bg-gray-200" />
+            <div className="h-10 w-28 rounded-2xl bg-gray-200" />
+            <div className="h-10 w-28 rounded-2xl bg-gray-200" />
+          </div>
+        ) : (
+          committees.map((committee) => (
+            <Chip text={committee.name} key={committee.name} />
+          ))
+        )}
       </div>
 
       {/* Bills */}
       <div className="mt-5 flex flex-col gap-5">
-        {bills.map((bill) => (
-          <BillBubble
-            bill={bill}
-            key={bill.id}
-            className="w-12/12 bg-white md:w-8/12"
-          />
-        ))}
+        {/* Loading spinner */}
+        {isLoading ? (
+          <div className="flex animate-pulse flex-col gap-5">
+            <div className="w-100 m-3 h-28 rounded-3xl bg-gray-200" />
+          </div>
+        ) : (
+          bills.map((bill) => (
+            <BillBubble
+              bill={bill}
+              key={bill.id}
+              className="w-12/12 bg-white md:w-8/12"
+            />
+          ))
+        )}
       </div>
 
       {/* Politicians */}
       <div className="mt-5 flex flex-col gap-5">
-        {politicians.map((politician) => (
-          <PoliticianBubble
-            politician={politician}
-            key={politician.id}
-            className="w-12/12 bg-white md:w-8/12"
-          />
-        ))}
+        {/* Loading spinner */}
+        {isLoading ? (
+          <div className="flex animate-pulse flex-col gap-5">
+            <div className="w-100 m-3 h-28 rounded-3xl bg-gray-200" />
+          </div>
+        ) : (
+          politicians.map((politician) => (
+            <PoliticianBubble
+              politician={politician}
+              key={politician.id}
+              className="w-12/12 bg-white md:w-8/12"
+            />
+          ))
+        )}
       </div>
     </ContentLayout>
   );
