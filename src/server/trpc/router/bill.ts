@@ -1,4 +1,3 @@
-import { BillSignificance } from "@prisma/client";
 import { z } from "zod";
 import { publicProcedure, router } from "../trpc";
 import findByIdOrThrow from "../util/findByIdOrThrow";

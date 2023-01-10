@@ -60,8 +60,7 @@ export default async function parseProfile(
 
   // Extract photoUrl
   const image = profileContainer!.querySelector("img");
-  const photoUrl = image!.getAttribute("src")!;
-  expect(photoUrl).not.toBeNull();
+  const photoUrl = image?.getAttribute("src") ?? null;
 
   // Extract designation information
   const titleContainer = profileContainer!.querySelector(".text-primary");

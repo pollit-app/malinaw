@@ -2,7 +2,8 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearch", "fullTextIndex"]
 }
 
 datasource db {
@@ -12,7 +13,7 @@ datasource db {
 }
 
 model Bill {
-  id           String           @id @default(uuid()) @db.Uuid
+  id           String            @id @default(uuid()) @db.Uuid
   billNum      String
   congressNum  Int
   house        CongressHouse
@@ -20,7 +21,7 @@ model Bill {
   shortTitle   String?
   abstract     String?
   dateFiled    String
-  significance BillSignificance
+  significance BillSignificance?
 
   committeeReferrals BillCommitteeReferral[]
 
