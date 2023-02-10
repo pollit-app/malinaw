@@ -1,5 +1,4 @@
-import type { NextApiRequest, NextApiResponse } from "next";
-import { prisma } from "../../server/db/client";
+import type { PrismaClient } from "@prisma/client";
 
 // Mapping of substrings to replace
 const changeMap = [["&quot;", '"']] as const;
@@ -8,8 +7,8 @@ const changeChars = changeMap.map((entry) => entry[0]);
 /**
  * Replace escaped HTML characters
  */
-async function cleanPoliticianNames() {
-  const politicians = (await prisma?.politician.findMany()) ?? [];
+export async function cleanHouseMembers(prisma: PrismaClient) {
+  const politicians = (await prisma.politician.findMany()) ?? [];
 
   // Identify politicians with characters to replace
   const updatePoliticians = politicians.filter((politician) =>
@@ -26,9 +25,9 @@ async function cleanPoliticianNames() {
   }));
 
   // Apply the changeset
-  await prisma?.$transaction(
+  await prisma.$transaction(
     changeSet.map((changeEntry) =>
-      prisma?.politician.update({
+      prisma.politician.update({
         where: {
           id: changeEntry.id,
         },
@@ -38,13 +37,4 @@ async function cleanPoliticianNames() {
       })
     )
   );
-}
-
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
-  await cleanPoliticianNames();
-
-  res.status(200).end();
 }
