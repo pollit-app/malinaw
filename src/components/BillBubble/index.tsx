@@ -41,7 +41,7 @@ export default function BillBubble({
       )}
     >
       <a
-        href={`/bill/${bill.id}`}
+        href={`/bill/${bill.congressNum}/${bill.billNum}`}
         target="_blank"
         rel="noreferrer"
         className="flex flex-row items-center gap-2 font-bold text-sky-500 transition-transform hover:translate-y-[-2px]"

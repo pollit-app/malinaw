@@ -1,7 +1,6 @@
 import { type NextPage } from "next";
 import Image from "next/image";
 import { useRouter } from "next/router";
-import { useState } from "react";
 import SearchBar from "../components/SearchBar";
 
 const Home: NextPage = () => {
