@@ -59,7 +59,7 @@ export default function BillPage() {
         )}
       >
         {/* Main content */}
-        <div className="w-12/12 flex flex-col gap-5 rounded-3xl bg-white py-5 px-10 md:w-9/12">
+        <div className="w-12/12 flex flex-col gap-5 rounded-3xl bg-white py-5 px-10 md:w-11/12 lg:w-9/12">
           {/* Bill information */}
           <section>
             {/* Bill header */}
@@ -97,17 +97,21 @@ export default function BillPage() {
           {/* Principal Authors */}
           <section>
             <h1 className="text-xl font-bold">Principal Authors</h1>
-            {principalAuthors.map((author) => (
-              <p key={author.id}>{author.name}</p>
-            ))}
+            <div className="grid md:grid-cols-2">
+              {principalAuthors.map((author) => (
+                <p key={author.id}>{author.name}</p>
+              ))}
+            </div>
           </section>
 
           {/* Co-authors */}
           <section>
             <h1 className="text-xl font-bold">Co-authors</h1>
-            {coAuthors.map((author) => (
-              <p key={author.id}>{author.name}</p>
-            ))}
+            <div className="grid md:grid-cols-2">
+              {coAuthors.map((author) => (
+                <p key={author.id}>{author.name}</p>
+              ))}
+            </div>
           </section>
         </div>
       </div>
