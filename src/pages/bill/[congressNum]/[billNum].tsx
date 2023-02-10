@@ -87,10 +87,12 @@ export default function BillPage() {
           </section>
 
           {/* Abstract */}
-          <section>
-            <h1 className="text-xl font-bold">Abstract</h1>
-            <p>{abstract}</p>
-          </section>
+          {abstract != null ? (
+            <section>
+              <h1 className="text-xl font-bold">Abstract</h1>
+              <p>{abstract}</p>
+            </section>
+          ) : null}
 
           {/* Principal Authors */}
           <section>
