@@ -11,12 +11,7 @@
     "prisma:generate": "prisma generate",
     "studio": "prisma studio",
     "scraper": "ts-node src/data/upload/index.ts",
-    "scraper:congressMembers": "npm run scraper -- congressMembers",
-    "scraper:congressBills": "npm run scraper -- congressBills",
-    "scraper:congressAuthorships": "npm run scraper -- congressAuthorships",
-    "scraper:congressCommittees": "npm run scraper -- congressCommittees",
-    "scraper:congressCommitteeMemberships": "npm run scraper -- congressCommitteeMemberships",
-    "scraper:congressCommitteeBills": "npm run scraper -- congressCommitteeBills",
+    "clean": "ts-node src/data/clean/index.ts",
     "ocr": "ts-node src/data/ocr/index.ts"
   },
   "dependencies": {

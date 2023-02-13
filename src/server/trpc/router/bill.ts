@@ -1,11 +1,32 @@
 import { z } from "zod";
 import { publicProcedure, router } from "../trpc";
-import findByIdOrThrow from "../util/findByIdOrThrow";
 
 export const billRouter = router({
   getBill: publicProcedure
-    .input(z.object({ id: z.string() }))
+    .input(z.object({ congressNum: z.number(), billNum: z.string() }))
     .query(async ({ ctx, input }) => {
-      return findByIdOrThrow(ctx.prisma.bill, input.id);
+      return await ctx.prisma.bill.findFirstOrThrow({
+        where: {
+          billNum: input.billNum,
+          congressNum: input.congressNum,
+        },
+        include: {
+          committeeReferrals: {
+            include: {
+              committee: true,
+            },
+          },
+          billAuthorships: {
+            include: {
+              author: true,
+            },
+            orderBy: [
+              {
+                authorshipType: "asc",
+              },
+            ],
+          },
+        },
+      });
     }),
 });

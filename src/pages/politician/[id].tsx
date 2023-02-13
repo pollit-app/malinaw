@@ -1,13 +1,11 @@
-import { useRouter } from "next/router";
-import ContentLayout from "../../layouts/ContentLayout";
-import { LinkIcon } from "@heroicons/react/24/outline";
-import { trpc } from "../../utils/trpc";
 import { CongressHouse } from "@prisma/client";
 import clsx from "clsx";
 import Image from "next/image";
-import lodash from "lodash";
-import Chip from "../../components/Chip";
+import { useRouter } from "next/router";
 import BillBubble from "../../components/BillBubble";
+import Chip from "../../components/Chip";
+import ContentLayout from "../../layouts/ContentLayout";
+import { trpc } from "../../utils/trpc";
 
 export default function PoliticianPage() {
   const router = useRouter();
