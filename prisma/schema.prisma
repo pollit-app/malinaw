@@ -12,6 +12,45 @@ datasource db {
   shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
 }
 
+// NextAuth
+model Account {
+  id                String  @id @default(uuid()) @db.Uuid
+  userId            String  @db.Uuid
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? // @db.Text
+  access_token      String? // @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? // @db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+// Authenticated session
+model Session {
+  id           String   @id @default(uuid()) @db.Uuid
+  sessionToken String   @unique
+  userId       String   @db.Uuid
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id            String           @id @default(uuid()) @db.Uuid
+  name          String?
+  email         String?          @unique
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+  Ballot        PositionBallot[]
+}
+
 model Bill {
   id           String            @id @default(uuid()) @db.Uuid
   billNum      String
@@ -30,16 +69,18 @@ model Bill {
   sourceUrl String
 
   // Generated
-  summary         String?
-  stances         Stance[]
-  billAuthorships BillAuthorship[]
+  summary            String?
+  stances            Stance[]
+  billAuthorships    BillAuthorship[]
+  resource           Resource?
+  referencedResource BillResourceAssociation[]
 
   @@unique([billNum, congressNum])
 }
 
 model Politician {
-  id         String        @id @default(uuid()) @db.Uuid
-  house      CongressHouse
+  id         String         @id @default(uuid()) @db.Uuid
+  house      CongressHouse?
   name       String
   role       String
   profileUrl String
@@ -51,8 +92,15 @@ model Politician {
 
   billAuthorships  BillAuthorship[]
   memberCommittees PoliticianCommiteeMembership[]
+
+  candidacies       Candidate[]
+  referencedBallots BallotCandidate[]
+
+  relevantResources PoliticianResourceAssociation[]
 }
 
+// Politicians can be members of committees (e.g. Education, Social Welfare)
+// Bills are assigned to committees
 model Committee {
   id    String        @id @default(uuid()) @db.Uuid
   name  String
@@ -71,7 +119,7 @@ model Stance {
   bills Bill[]
 }
 
-// Junction tables
+// Join table between Bill and Politician
 model BillAuthorship {
   id       String @id @default(uuid()) @db.Uuid
   billId   String @db.Uuid
@@ -84,6 +132,7 @@ model BillAuthorship {
   @@unique([billId, authorId])
 }
 
+// Join table between Bill and Committee
 model BillCommitteeReferral {
   id           String           @id @default(uuid()) @db.Uuid
   billId       String           @db.Uuid
@@ -96,6 +145,7 @@ model BillCommitteeReferral {
   @@unique([billId, committeeId, referralType])
 }
 
+// Join table between politician and committee
 model PoliticianCommiteeMembership {
   id           String  @id @default(uuid()) @db.Uuid
   politicianId String  @db.Uuid
@@ -106,6 +156,108 @@ model PoliticianCommiteeMembership {
   committee  Committee  @relation(fields: [committeeId], references: [id])
 
   @@unique([politicianId, committeeId])
+}
+
+// A politician and the position they are running for
+model Candidate {
+  id String @id @default(uuid()) @db.Uuid
+
+  politicianId String     @db.Uuid
+  politician   Politician @relation(fields: [politicianId], references: [id])
+
+  position Position
+}
+
+// A user's set of potential candidates for a position
+model PositionBallot {
+  id       String @id @default(uuid()) @db.Uuid
+  authorId String @db.Uuid
+  author   User   @relation(fields: [authorId], references: [id])
+
+  position   Position
+  candidates BallotCandidate[]
+}
+
+// A candidate for a specific person on a user's ballot
+// This will include evidence collected by the user for their decision
+model BallotCandidate {
+  id           String @id @default(uuid()) @db.Uuid
+  ballotId     String @db.Uuid
+  politicianId String @db.Uuid
+
+  ballot     PositionBallot @relation(fields: [ballotId], references: [id])
+  politician Politician     @relation(fields: [politicianId], references: [id])
+
+  resources BallotCandidateResource[]
+
+  @@unique([ballotId, politicianId])
+}
+
+// A news article or bill that can be saved as evidence for a candidate
+model Resource {
+  id           String       @id @default(uuid()) @db.Uuid
+  resourceType ResourceType
+
+  // If ResourceType is BILL
+  billId String? @unique @db.Uuid
+  bill   Bill?   @relation(fields: [billId], references: [id])
+
+  // If ResourceType is NEWS
+  url    String?
+  title  String?
+  topics String[]
+
+  // Politicians associated with this resource
+  politicianAssociation PoliticianResourceAssociation[]
+  billAssociation       BillResourceAssociation[]
+
+  referencedBallots BallotCandidateResource[]
+}
+
+// Join table for Resource and BallotCandidate
+model BallotCandidateResource {
+  id String @id @default(uuid()) @db.Uuid
+
+  ballotCandidateId String @db.Uuid
+  resourceId        String @db.Uuid
+
+  ballotCandidate BallotCandidate @relation(fields: [ballotCandidateId], references: [id])
+  resource        Resource        @relation(fields: [resourceId], references: [id])
+
+  @@unique([ballotCandidateId, resourceId])
+}
+
+// Join table for Resource and Politician
+model PoliticianResourceAssociation {
+  id String @id @default(uuid()) @db.Uuid
+
+  politicianId String @db.Uuid
+  resourceId   String @db.Uuid
+
+  politician Politician @relation(fields: [politicianId], references: [id])
+  resource   Resource   @relation(fields: [resourceId], references: [id])
+
+  @@unique([politicianId, resourceId])
+}
+
+// Join table for Resource and Bill
+model BillResourceAssociation {
+  id String @id @default(uuid()) @db.Uuid
+
+  billId     String @db.Uuid
+  resourceId String @db.Uuid
+
+  bill     Bill     @relation(fields: [billId], references: [id])
+  resource Resource @relation(fields: [resourceId], references: [id])
+
+  @@unique([billId, resourceId])
+}
+
+// A news source with its RSS API url
+model NewsSource {
+  id     String @id @default(uuid()) @db.Uuid
+  name   String
+  rssUrl String
 }
 
 // Enums
@@ -127,4 +279,15 @@ enum BillSignificance {
 enum BillAuthorshipType {
   PRINCIPAL
   COAUTHOR
+}
+
+enum Position {
+  PRESIDENT
+  VICE_PRESIDENT
+  SENATOR
+}
+
+enum ResourceType {
+  NEWS
+  BILL
 }
